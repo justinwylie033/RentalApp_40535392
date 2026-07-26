@@ -11,10 +11,12 @@ public sealed class ApiClientTests
     {
         string? capturedScheme = null;
         string? capturedToken = null;
+        string? capturedCorrelationId = null;
         var handler = new StubHandler(request =>
         {
             capturedScheme = request.Headers.Authorization?.Scheme;
             capturedToken = request.Headers.Authorization?.Parameter;
+            capturedCorrelationId = request.Headers.GetValues("X-Correlation-ID").Single();
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent("{\"value\":42}", Encoding.UTF8, "application/json")
@@ -28,14 +30,20 @@ public sealed class ApiClientTests
         Assert.Equal(42, result.Value);
         Assert.Equal("Bearer", capturedScheme);
         Assert.Equal("access-token", capturedToken);
+        Assert.Equal(32, capturedCorrelationId?.Length);
     }
 
     [Fact]
     public async Task GetAsync_BadRequest_ThrowsApiMessage()
     {
-        var handler = new StubHandler(_ => new HttpResponseMessage(HttpStatusCode.BadRequest)
+        var handler = new StubHandler(_ =>
         {
-            Content = new StringContent("{\"error\":\"Invalid request\"}", Encoding.UTF8, "application/json")
+            var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+            {
+                Content = new StringContent("{\"error\":\"Invalid request\"}", Encoding.UTF8, "application/json")
+            };
+            response.Headers.Add("X-Correlation-ID", "server-reference-123");
+            return response;
         });
         var client = new ApiClient(
             new HttpClient(handler) { BaseAddress = new Uri("http://localhost/") },
@@ -45,6 +53,7 @@ public sealed class ApiClientTests
 
         Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
         Assert.Equal("Invalid request", exception.Message);
+        Assert.Equal("server-reference-123", exception.CorrelationId);
     }
 
     [Fact]

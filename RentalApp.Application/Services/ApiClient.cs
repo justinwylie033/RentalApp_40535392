@@ -17,13 +17,18 @@ public interface IApiClient
 
 public sealed class ApiClientException : Exception
 {
-    public ApiClientException(string message, HttpStatusCode statusCode)
+    public ApiClientException(
+        string message,
+        HttpStatusCode statusCode,
+        string? correlationId = null)
         : base(message)
     {
         StatusCode = statusCode;
+        CorrelationId = correlationId;
     }
 
     public HttpStatusCode StatusCode { get; }
+    public string? CorrelationId { get; }
 }
 
 public sealed class ApiClient : IApiClient
@@ -104,11 +109,17 @@ public sealed class ApiClient : IApiClient
                     // Authentication middleware can return an empty non-success response.
                 }
 
-                throw new ApiClientException(error?.Error ?? "The server rejected the request.", response.StatusCode);
+                throw new ApiClientException(
+                    error?.Error ?? "The server rejected the request.",
+                    response.StatusCode,
+                    GetCorrelationId(response));
             }
 
             return await response.Content.ReadFromJsonAsync<T>(_jsonOptions, cancellationToken)
-                ?? throw new ApiClientException("The server returned an empty response.", response.StatusCode);
+                ?? throw new ApiClientException(
+                    "The server returned an empty response.",
+                    response.StatusCode,
+                    GetCorrelationId(response));
         }
     }
 
@@ -119,6 +130,7 @@ public sealed class ApiClient : IApiClient
         CancellationToken cancellationToken)
     {
         var tokens = await _tokenStore.GetAsync();
+        var correlationId = Guid.NewGuid().ToString("N");
         var canRetryTransientNetworkFailure = method == HttpMethod.Get
             || path.Equals("auth/token", StringComparison.OrdinalIgnoreCase);
 
@@ -127,6 +139,7 @@ public sealed class ApiClient : IApiClient
             // HttpRequestMessage cannot be sent twice, so each retry gets a new
             // message while reusing the same strongly typed request body.
             using var request = new HttpRequestMessage(method, path);
+            request.Headers.Add("X-Correlation-ID", correlationId);
             if (tokens is not null)
             {
                 // Tokens come from Android Secure Storage through ITokenStore.
@@ -153,19 +166,22 @@ public sealed class ApiClient : IApiClient
             {
                 throw new ApiClientException(
                     "The server took too long to respond. Check that Docker is running and VS Code is not forwarding port 8080.",
-                    HttpStatusCode.RequestTimeout);
+                    HttpStatusCode.RequestTimeout,
+                    correlationId);
             }
             catch (HttpRequestException)
             {
                 throw new ApiClientException(
                     "Cannot reach the RentalApp API. Check Docker and the network connection.",
-                    HttpStatusCode.ServiceUnavailable);
+                    HttpStatusCode.ServiceUnavailable,
+                    correlationId);
             }
         }
 
         throw new ApiClientException(
             "Cannot reach the RentalApp API after three attempts.",
-            HttpStatusCode.ServiceUnavailable);
+            HttpStatusCode.ServiceUnavailable,
+            correlationId);
     }
 
     private async Task<bool> TryRefreshAsync(CancellationToken cancellationToken)
@@ -217,4 +233,9 @@ public sealed class ApiClient : IApiClient
         options.Converters.Add(new JsonStringEnumConverter());
         return options;
     }
+
+    private static string? GetCorrelationId(HttpResponseMessage response) =>
+        response.Headers.TryGetValues("X-Correlation-ID", out var values)
+            ? values.FirstOrDefault()
+            : null;
 }
