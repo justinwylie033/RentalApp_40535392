@@ -79,6 +79,19 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ApiResponses_EchoValidCorrelationIdentifier()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/health/live");
+        request.Headers.Add("X-Correlation-ID", "demo-request-40535392");
+
+        using var response = await _client.SendAsync(request);
+
+        Assert.Equal(
+            "demo-request-40535392",
+            Assert.Single(response.Headers.GetValues("X-Correlation-ID")));
+    }
+
+    [Fact]
     public async Task AuthenticationEndpoints_RegisterLoginRefreshAndProfile_CompleteRoundTrip()
     {
         var email = $"coverage-{Guid.NewGuid():N}@test.local";
