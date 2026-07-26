@@ -5,7 +5,8 @@
              Title="My listings">
     <Grid Padding="18" RowDefinitions="Auto,Auto,*" RowSpacing="12">
         <VerticalStackLayout>
-            <Label Text="My listings" Style="{StaticResource PageTitle}" />
+            <Label Text="My listings" Style="{StaticResource PageTitle}"
+                   SemanticProperties.HeadingLevel="Level1" />
             <Label Text="Manage everything you have offered to the community."
                    Style="{StaticResource MutedLabel}" />
         </VerticalStackLayout>
@@ -34,6 +35,7 @@
                             <Button Grid.Row="2"
                                     Grid.ColumnSpan="2"
                                     Text="Manage listing"
+                                    SemanticProperties.Hint="Open this listing to edit its details and availability"
                                     Style="{StaticResource SecondaryButton}"
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenItemCommand}"
                                     CommandParameter="{Binding .}" />

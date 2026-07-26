@@ -6,7 +6,8 @@
     <ScrollView>
         <VerticalStackLayout Padding="22" Spacing="14" MaximumWidthRequest="620">
             <VerticalStackLayout>
-                <Label Text="Your profile" Style="{StaticResource PageTitle}" />
+                <Label Text="Your profile" Style="{StaticResource PageTitle}"
+                       SemanticProperties.HeadingLevel="Level1" />
                 <Label Text="Account details and marketplace reputation."
                        Style="{StaticResource MutedLabel}" />
             </VerticalStackLayout>

@@ -12,7 +12,8 @@
                     StrokeShape="RoundRectangle 20"
                     Padding="24">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="RentalApp" FontSize="34" FontAttributes="Bold" TextColor="White" />
+                    <Label Text="RentalApp" FontSize="34" FontAttributes="Bold" TextColor="White"
+                           SemanticProperties.HeadingLevel="Level1" />
                     <Label Text="Borrow useful things from trusted people nearby."
                            FontSize="16" TextColor="#DBEAFE" />
                     <Label Text="Community rentals · secure accounts · local discovery"
@@ -27,14 +28,17 @@
                            Style="{StaticResource MutedLabel}" />
 
                     <Label Text="DISPLAY NAME (NEW ACCOUNTS)" Style="{StaticResource InputLabel}" Margin="0,10,0,0" />
-                    <Entry Text="{Binding DisplayName}" Placeholder="Your name" MaxLength="80" />
+                    <Entry Text="{Binding DisplayName}" Placeholder="Your name" MaxLength="80"
+                           SemanticProperties.Description="Display name for a new account" />
 
                     <Label Text="EMAIL" Style="{StaticResource InputLabel}" />
                     <Entry Text="{Binding Email}" Keyboard="Email" Placeholder="name@example.com"
+                           SemanticProperties.Description="Account email address"
                            AutomationId="EmailEntry" />
 
                     <Label Text="PASSWORD" Style="{StaticResource InputLabel}" />
                     <Entry Text="{Binding Password}" IsPassword="True" Placeholder="At least 8 characters"
+                           SemanticProperties.Description="Account password"
                            AutomationId="PasswordEntry" />
 
                     <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorLabel}" />

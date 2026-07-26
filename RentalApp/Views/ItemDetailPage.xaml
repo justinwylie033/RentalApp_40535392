@@ -11,7 +11,8 @@
             <Label Text="{Binding ConfirmationMessage}" Style="{StaticResource SuccessLabel}" />
 
             <VerticalStackLayout IsVisible="{Binding IsViewing}" Spacing="10">
-                <Label Text="{Binding Item.Title}" Style="{StaticResource PageTitle}" />
+                <Label Text="{Binding Item.Title}" Style="{StaticResource PageTitle}"
+                       SemanticProperties.HeadingLevel="Level1" />
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                     <Border BackgroundColor="{StaticResource PrimaryLight}" StrokeThickness="0"
                             StrokeShape="RoundRectangle 12" Padding="10,6" HorizontalOptions="Start">
@@ -69,12 +70,14 @@
                             <VerticalStackLayout>
                                 <Label Text="START DATE" Style="{StaticResource InputLabel}" />
                                 <DatePicker Date="{Binding StartDate}"
+                                            SemanticProperties.Description="Rental start date"
                                             MinimumDate="{Binding MinimumRentalDate}"
                                             Format="dd/MM/yyyy" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1">
                                 <Label Text="END DATE" Style="{StaticResource InputLabel}" />
                                 <DatePicker Date="{Binding EndDate}"
+                                            SemanticProperties.Description="Rental end date"
                                             MinimumDate="{Binding MinimumRentalDate}"
                                             Format="dd/MM/yyyy" />
                             </VerticalStackLayout>
@@ -92,7 +95,8 @@
 
             <Border Style="{StaticResource Card}" IsVisible="{Binding IsEditing}">
                 <VerticalStackLayout Spacing="7">
-                    <Label Text="Edit listing" Style="{StaticResource PageTitle}" />
+                    <Label Text="Edit listing" Style="{StaticResource PageTitle}"
+                           SemanticProperties.HeadingLevel="Level1" />
                     <Label Text="TITLE" Style="{StaticResource InputLabel}" />
                     <Entry Text="{Binding EditTitle}" MaxLength="120" />
                     <Label Text="DESCRIPTION" Style="{StaticResource InputLabel}" />

@@ -5,7 +5,8 @@
              Title="Browse">
     <Grid Padding="18" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
         <VerticalStackLayout>
-            <Label Text="Browse items" Style="{StaticResource PageTitle}" />
+            <Label Text="Browse items" Style="{StaticResource PageTitle}"
+                   SemanticProperties.HeadingLevel="Level1" />
             <Label Text="Useful things available from people in your community."
                    Style="{StaticResource MutedLabel}" />
         </VerticalStackLayout>
@@ -17,6 +18,7 @@
                        Text="{Binding SearchTerm}"
                        ReturnType="Search"
                        ReturnCommand="{Binding LoadCommand}"
+                       SemanticProperties.Description="Search listings by title, description or collection address"
                        SemanticProperties.Hint="Search marketplace listings" />
                 <Picker Grid.Row="1"
                         ItemsSource="{Binding Categories}"
@@ -31,6 +33,7 @@
                         Grid.ColumnSpan="2"
                         Text="Search marketplace"
                         Command="{Binding LoadCommand}"
+                        SemanticProperties.Hint="Apply the selected search, category and sort order"
                         Style="{StaticResource SecondaryButton}" />
             </Grid>
         </Border>
