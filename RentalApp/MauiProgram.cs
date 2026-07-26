@@ -42,6 +42,7 @@ public static class MauiProgram
 
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<ItemsListViewModel>();
+        builder.Services.AddTransient<MyListingsViewModel>();
         builder.Services.AddTransient<ItemDetailViewModel>();
         builder.Services.AddTransient<CreateItemViewModel>();
         builder.Services.AddTransient<NearbyItemsViewModel>();
@@ -51,6 +52,7 @@ public static class MauiProgram
 
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<ItemsListPage>();
+        builder.Services.AddTransient<MyListingsPage>();
         builder.Services.AddTransient<ItemDetailPage>();
         builder.Services.AddTransient<CreateItemPage>();
         builder.Services.AddTransient<NearbyItemsPage>();

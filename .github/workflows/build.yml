@@ -50,6 +50,13 @@ jobs:
       - name: Restore testable projects
         run: dotnet restore RentalApp.Test/RentalApp.Test.csproj
 
+      - name: Report vulnerable dependencies
+        run: >-
+          dotnet list RentalApp.Test/RentalApp.Test.csproj
+          package
+          --vulnerable
+          --include-transitive
+
       - name: Build API and tests
         run: >-
           dotnet build RentalApp.Test/RentalApp.Test.csproj

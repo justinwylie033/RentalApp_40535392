@@ -36,6 +36,62 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ReadinessEndpoint_PostgresAvailable_ReturnsHealthyStatus()
+    {
+        using var response = await _client.GetAsync("/health/ready");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains(
+            "Healthy",
+            await response.Content.ReadAsStringAsync(),
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task LoginEndpoint_RepeatedAttempts_ReturnsTooManyRequests()
+    {
+        HttpResponseMessage? finalResponse = null;
+        for (var attempt = 0; attempt < 11; attempt++)
+        {
+            finalResponse?.Dispose();
+            finalResponse = await _client.PostAsJsonAsync(
+                "/auth/token",
+                new LoginRequest("missing@example.com", "Incorrect123!"),
+                JsonOptions);
+        }
+
+        using (finalResponse)
+        {
+            Assert.Equal(HttpStatusCode.TooManyRequests, finalResponse!.StatusCode);
+        }
+    }
+
+    [Fact]
+    public async Task ApiResponses_IncludeDefenceInDepthSecurityHeaders()
+    {
+        using var response = await _client.GetAsync("/health/live");
+
+        Assert.Equal("nosniff", Assert.Single(response.Headers.GetValues("X-Content-Type-Options")));
+        Assert.Equal("DENY", Assert.Single(response.Headers.GetValues("X-Frame-Options")));
+        Assert.Equal("no-referrer", Assert.Single(response.Headers.GetValues("Referrer-Policy")));
+        Assert.Contains("default-src 'none'", Assert.Single(
+            response.Headers.GetValues("Content-Security-Policy")), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ApiResponses_EchoValidCorrelationIdentifier()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/health/live");
+        request.Headers.Add("X-Correlation-ID", "demo-request-40535392");
+
+        using var response = await _client.SendAsync(request);
+
+        Assert.Equal(
+            "demo-request-40535392",
+            Assert.Single(response.Headers.GetValues("X-Correlation-ID")));
+    }
+
+    [Fact]
     public async Task AuthenticationEndpoints_RegisterLoginRefreshAndProfile_CompleteRoundTrip()
     {
         var email = $"coverage-{Guid.NewGuid():N}@test.local";
@@ -97,7 +153,7 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
 
         using var browseResponse = await SendAuthorizedAsync(HttpMethod.Get, "/items/", owner.AccessToken);
         Assert.Equal(HttpStatusCode.OK, browseResponse.StatusCode);
-        Assert.NotEmpty(await ReadAsync<List<ItemSummaryDto>>(browseResponse));
+        Assert.NotEmpty((await ReadAsync<PagedResult<ItemSummaryDto>>(browseResponse)).Items);
 
         var create = new CreateItemRequest(
             "Coverage pressure washer",
@@ -175,7 +231,7 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
         var owner = await LoginAsync("sarah@example.com", "Rental123!");
         var borrower = await LoginAsync("mike@example.com", "Rental123!");
         using var itemResponse = await SendAuthorizedAsync(HttpMethod.Get, "/items/", borrower.AccessToken);
-        var item = (await ReadAsync<List<ItemSummaryDto>>(itemResponse))
+        var item = (await ReadAsync<PagedResult<ItemSummaryDto>>(itemResponse)).Items
             .Single(candidate => candidate.Title == "18V Cordless Drill");
         var start = DateTimeOffset.UtcNow.Date.AddDays(20);
 
@@ -227,7 +283,7 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
             HttpMethod.Get,
             "/items/",
             borrower.AccessToken);
-        var reviewedItem = (await ReadAsync<List<ItemSummaryDto>>(updatedItemsResponse))
+        var reviewedItem = (await ReadAsync<PagedResult<ItemSummaryDto>>(updatedItemsResponse)).Items
             .Single(candidate => candidate.Id == item.Id);
         Assert.Equal(5, reviewedItem.AverageRating);
         Assert.Equal(1, reviewedItem.ReviewCount);

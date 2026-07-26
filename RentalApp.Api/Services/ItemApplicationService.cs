@@ -7,7 +7,14 @@ namespace RentalApp.Api.Services;
 
 public interface IItemApplicationService
 {
-    Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(ItemCategory? category, CancellationToken cancellationToken = default);
+    Task<PagedResult<ItemSummaryDto>> GetAllAsync(
+        ItemCategory? category,
+        string? search,
+        ItemSortOrder sort,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ItemSummaryDto>> GetOwnedAsync(Guid ownerId, CancellationToken cancellationToken = default);
     Task<ItemDetailDto> GetAsync(Guid id, CancellationToken cancellationToken = default);
     Task<ItemDetailDto> CreateAsync(Guid ownerId, CreateItemRequest request, CancellationToken cancellationToken = default);
     Task<ItemDetailDto> UpdateAsync(Guid ownerId, Guid id, UpdateItemRequest request, CancellationToken cancellationToken = default);
@@ -26,13 +33,25 @@ public sealed class ItemApplicationService : IItemApplicationService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(
+    public async Task<PagedResult<ItemSummaryDto>> GetAllAsync(
         ItemCategory? category,
+        string? search,
+        ItemSortOrder sort,
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
-        var availableItems = await _items.GetAvailableAsync(category, cancellationToken);
-        var response = availableItems.Select(item => item.ToSummary()).ToList();
-        return response;
+        CatalogueRequestValidator.ValidateQuery(search, page, pageSize);
+
+        var result = await _items.GetAvailableAsync(
+            category,
+            search,
+            sort,
+            page,
+            pageSize,
+            cancellationToken);
+        var items = result.Items.Select(item => item.ToSummary()).ToList();
+        return new PagedResult<ItemSummaryDto>(items, page, pageSize, result.TotalCount);
     }
 
     public async Task<ItemDetailDto> GetAsync(Guid id, CancellationToken cancellationToken = default)
@@ -42,12 +61,26 @@ public sealed class ItemApplicationService : IItemApplicationService
         return item.ToDetail();
     }
 
+    public async Task<IReadOnlyList<ItemSummaryDto>> GetOwnedAsync(
+        Guid ownerId,
+        CancellationToken cancellationToken = default)
+    {
+        var ownedItems = await _items.GetOwnedAsync(ownerId, cancellationToken);
+        return ownedItems.Select(item => item.ToSummary()).ToList();
+    }
+
     public async Task<ItemDetailDto> CreateAsync(
         Guid ownerId,
         CreateItemRequest request,
         CancellationToken cancellationToken = default)
     {
-        Validate(request.Title, request.Description, request.DailyRate, request.Address, request.Latitude, request.Longitude);
+        CatalogueRequestValidator.ValidateItem(
+            request.Title,
+            request.Description,
+            request.DailyRate,
+            request.Address,
+            request.Latitude,
+            request.Longitude);
         var item = new Item
         {
             OwnerId = ownerId,
@@ -72,7 +105,13 @@ public sealed class ItemApplicationService : IItemApplicationService
         UpdateItemRequest request,
         CancellationToken cancellationToken = default)
     {
-        Validate(request.Title, request.Description, request.DailyRate, request.Address, request.Latitude, request.Longitude);
+        CatalogueRequestValidator.ValidateItem(
+            request.Title,
+            request.Description,
+            request.DailyRate,
+            request.Address,
+            request.Latitude,
+            request.Longitude);
         var item = await _items.GetByIdAsync(id, cancellationToken)
             ?? throw new KeyNotFoundException("Item not found.");
 
@@ -103,39 +142,6 @@ public sealed class ItemApplicationService : IItemApplicationService
         return point;
     }
 
-    private static void Validate(
-        string title,
-        string description,
-        decimal rate,
-        string address,
-        double latitude,
-        double longitude)
-    {
-        if (title.Trim().Length is < 3 or > 120)
-        {
-            throw new BusinessRuleException("Title must contain between 3 and 120 characters.");
-        }
-
-        if (description.Trim().Length is < 10 or > 1_500)
-        {
-            throw new BusinessRuleException("Description must contain between 10 and 1,500 characters.");
-        }
-
-        if (rate is <= 0 or > 10_000)
-        {
-            throw new BusinessRuleException("Daily rate must be greater than zero and no more than £10,000.");
-        }
-
-        if (string.IsNullOrWhiteSpace(address) || address.Trim().Length is < 5 or > 250)
-        {
-            throw new BusinessRuleException("Enter a collection address between 5 and 250 characters.");
-        }
-
-        if (latitude is < -90 or > 90 || longitude is < -180 or > 180)
-        {
-            throw new BusinessRuleException("Location coordinates are outside the valid range.");
-        }
-    }
 }
 
 internal static class ItemMappingExtensions

@@ -6,7 +6,8 @@
     <Grid Padding="16" RowDefinitions="Auto,Auto,*,Auto,*,Auto" RowSpacing="8">
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
             <VerticalStackLayout>
-                <Label Text="Rental workflow" Style="{StaticResource PageTitle}" />
+                <Label Text="Rental workflow" Style="{StaticResource PageTitle}"
+                       SemanticProperties.HeadingLevel="Level1" />
                 <Label Text="Select a rental to enable its next valid state transition."
                        Style="{StaticResource MutedLabel}" />
             </VerticalStackLayout>
@@ -70,9 +71,11 @@
                            Style="{StaticResource MutedLabel}" />
                     <FlexLayout Wrap="Wrap" JustifyContent="Start" Direction="Row">
                         <Button Text="Approve request" Command="{Binding ApproveCommand}"
+                                SemanticProperties.Hint="Approve the selected incoming rental request"
                                 IsVisible="{Binding CanApproveSelected}" Margin="2"
                                 Style="{StaticResource CompactButton}" />
                         <Button Text="Reject request" Command="{Binding RejectCommand}"
+                                SemanticProperties.Hint="Reject the selected incoming rental request"
                                 IsVisible="{Binding CanRejectSelected}" Margin="2"
                                 Style="{StaticResource DangerButton}" />
                         <Button Text="Confirm item collected" Command="{Binding MarkOutForRentCommand}"
@@ -92,8 +95,13 @@
                     <Label Text="{Binding RequestGuidance}"
                            Style="{StaticResource MutedLabel}" />
                     <Button Text="I returned the item" Command="{Binding MarkReturnedCommand}"
+                            SemanticProperties.Hint="Confirm that you returned the selected rented item"
                             IsVisible="{Binding CanReturnSelected}" Margin="2"
                             Style="{StaticResource CompactButton}" />
+                    <Button Text="Cancel request" Command="{Binding CancelCommand}"
+                            SemanticProperties.Hint="Cancel the selected request before item collection"
+                            IsVisible="{Binding CanCancelSelected}" Margin="2"
+                            Style="{StaticResource DangerButton}" />
                     <Button Text="Leave verified review" Command="{Binding ReviewCommand}"
                             IsVisible="{Binding CanReviewSelected}" Margin="2"
                             Style="{StaticResource CompactButton}" />

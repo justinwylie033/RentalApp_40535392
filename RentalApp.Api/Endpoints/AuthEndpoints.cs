@@ -9,9 +9,15 @@ public static class AuthEndpoints
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/auth").WithTags("Authentication");
-        group.MapPost("/register", RegisterAsync).AllowAnonymous();
-        group.MapPost("/token", LoginAsync).AllowAnonymous();
-        group.MapPost("/refresh", RefreshAsync).AllowAnonymous();
+        group.MapPost("/register", RegisterAsync)
+            .AllowAnonymous()
+            .RequireRateLimiting("authentication");
+        group.MapPost("/token", LoginAsync)
+            .AllowAnonymous()
+            .RequireRateLimiting("authentication");
+        group.MapPost("/refresh", RefreshAsync)
+            .AllowAnonymous()
+            .RequireRateLimiting("authentication");
         group.MapGet("/me", GetProfileAsync).RequireAuthorization();
         return endpoints;
     }

@@ -14,6 +14,12 @@ public interface IRentalWorkflowService
     Task<IReadOnlyList<RentalSummaryDto>> GetIncomingAsync(Guid ownerId, CancellationToken cancellationToken = default);
     /// <summary>Returns rentals requested by the current user.</summary>
     Task<IReadOnlyList<RentalSummaryDto>> GetOutgoingAsync(Guid borrowerId, CancellationToken cancellationToken = default);
+    /// <summary>Returns booked date ranges so clients can guide date selection.</summary>
+    Task<IReadOnlyList<UnavailableDateRangeDto>> GetUnavailableDatesAsync(
+        Guid itemId,
+        DateTimeOffset fromUtc,
+        DateTimeOffset toUtc,
+        CancellationToken cancellationToken = default);
     /// <summary>Applies a role-authorised and state-valid transition.</summary>
     Task<RentalSummaryDto> TransitionAsync(Guid userId, Guid rentalId, RentalStatus nextStatus, CancellationToken cancellationToken = default);
     /// <summary>Moves expired out-for-rent records into the overdue state.</summary>
@@ -104,6 +110,25 @@ public sealed class RentalWorkflowService : IRentalWorkflowService
         return outgoingRentals.Select(rental => rental.ToSummary()).ToList();
     }
 
+    public async Task<IReadOnlyList<UnavailableDateRangeDto>> GetUnavailableDatesAsync(
+        Guid itemId,
+        DateTimeOffset fromUtc,
+        DateTimeOffset toUtc,
+        CancellationToken cancellationToken = default)
+    {
+        var from = fromUtc.ToUniversalTime();
+        var to = toUtc.ToUniversalTime();
+        if (to < from || to > from.AddYears(1))
+        {
+            throw new BusinessRuleException("Availability can be checked for a period of up to one year.");
+        }
+
+        var ranges = await _rentals.GetUnavailableRangesAsync(itemId, from, to, cancellationToken);
+        return ranges
+            .Select(rental => new UnavailableDateRangeDto(rental.StartDateUtc, rental.EndDateUtc))
+            .ToList();
+    }
+
     public async Task<RentalSummaryDto> TransitionAsync(
         Guid userId,
         Guid rentalId,
@@ -158,6 +183,10 @@ public sealed class RentalWorkflowService : IRentalWorkflowService
             nextStatus == RentalStatus.Completed)
         {
             permitted = isOwner;
+        }
+        else if (nextStatus == RentalStatus.Cancelled)
+        {
+            permitted = isBorrower;
         }
         else if (nextStatus == RentalStatus.Returned)
         {

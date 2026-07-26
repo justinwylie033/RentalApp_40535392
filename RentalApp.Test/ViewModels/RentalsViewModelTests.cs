@@ -107,6 +107,42 @@ public sealed class RentalsViewModelTests
     }
 
     [Fact]
+    public async Task ApprovedOutgoingRental_CancelCommandTransitionsToCancelled()
+    {
+        var borrowerId = Guid.NewGuid();
+        var rental = CreateRental(Guid.NewGuid(), borrowerId, RentalStatus.Approved);
+        var rentalService = new Mock<IRentalService>();
+        rentalService.Setup(service => service.GetIncomingAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        rentalService.SetupSequence(service => service.GetOutgoingAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([rental])
+            .ReturnsAsync([rental with { Status = RentalStatus.Cancelled }]);
+        rentalService.Setup(service => service.UpdateStatusAsync(
+                rental.Id,
+                RentalStatus.Cancelled,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(rental with { Status = RentalStatus.Cancelled });
+        var authentication = new Mock<IAuthenticationService>();
+        authentication.Setup(service => service.GetProfileAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new UserProfileDto(borrowerId, "Borrower", "borrower@test.local", 0, 0));
+        var viewModel = new RentalsViewModel(
+            rentalService.Object,
+            authentication.Object,
+            Mock.Of<INavigationService>());
+        await viewModel.LoadCommand.ExecuteAsync(null);
+        viewModel.SelectedOutgoingRental = rental;
+
+        Assert.True(viewModel.CanCancelSelected);
+        await viewModel.CancelCommand.ExecuteAsync(null);
+
+        rentalService.Verify(service => service.UpdateStatusAsync(
+            rental.Id,
+            RentalStatus.Cancelled,
+            It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Contains("Cancelled", viewModel.ConfirmationMessage!, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task CompletedOutgoingRental_ReviewCommandNavigatesToExactRental()
     {
         var borrowerId = Guid.NewGuid();

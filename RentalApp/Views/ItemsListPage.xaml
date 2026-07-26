@@ -5,17 +5,36 @@
              Title="Browse">
     <Grid Padding="18" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
         <VerticalStackLayout>
-            <Label Text="Browse items" Style="{StaticResource PageTitle}" />
+            <Label Text="Browse items" Style="{StaticResource PageTitle}"
+                   SemanticProperties.HeadingLevel="Level1" />
             <Label Text="Useful things available from people in your community."
                    Style="{StaticResource MutedLabel}" />
         </VerticalStackLayout>
 
         <Border Grid.Row="1" Style="{StaticResource Card}">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
-                        Title="Filter by category" />
-                <Button Grid.Column="1" Text="Refresh" Command="{Binding LoadCommand}"
-                        Style="{StaticResource CompactButton}" VerticalOptions="Center" />
+            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="8" ColumnSpacing="10">
+                <Entry Grid.ColumnSpan="2"
+                       Placeholder="Search title, description or address"
+                       Text="{Binding SearchTerm}"
+                       ReturnType="Search"
+                       ReturnCommand="{Binding LoadCommand}"
+                       SemanticProperties.Description="Search listings by title, description or collection address"
+                       SemanticProperties.Hint="Search marketplace listings" />
+                <Picker Grid.Row="1"
+                        ItemsSource="{Binding Categories}"
+                        SelectedItem="{Binding SelectedCategory}"
+                        Title="Category" />
+                <Picker Grid.Row="1"
+                        Grid.Column="1"
+                        ItemsSource="{Binding SortOrders}"
+                        SelectedItem="{Binding SelectedSortOrder}"
+                        Title="Sort order" />
+                <Button Grid.Row="2"
+                        Grid.ColumnSpan="2"
+                        Text="Search marketplace"
+                        Command="{Binding LoadCommand}"
+                        SemanticProperties.Hint="Apply the selected search, category and sort order"
+                        Style="{StaticResource SecondaryButton}" />
             </Grid>
         </Border>
 
@@ -26,6 +45,11 @@
         </VerticalStackLayout>
 
         <CollectionView Grid.Row="3" ItemsSource="{Binding Items}" EmptyView="No available items match this filter.">
+            <CollectionView.Header>
+                <Label Text="{Binding TotalResults, StringFormat='{0} listings found'}"
+                       Style="{StaticResource MutedLabel}"
+                       Margin="0,0,0,8" />
+            </CollectionView.Header>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Border Style="{StaticResource Card}">
@@ -55,6 +79,13 @@
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+            <CollectionView.Footer>
+                <Button Text="Load more"
+                        Margin="0,8,0,0"
+                        IsVisible="{Binding HasMoreItems}"
+                        Command="{Binding LoadMoreCommand}"
+                        Style="{StaticResource SecondaryButton}" />
+            </CollectionView.Footer>
         </CollectionView>
     </Grid>
 </ContentPage>

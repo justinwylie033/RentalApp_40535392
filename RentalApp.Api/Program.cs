@@ -1,5 +1,8 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +24,22 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+builder.Services.AddHealthChecks()
+    .AddCheck<PostgresHealthCheck>("postgres", tags: ["ready"]);
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("authentication", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            $"{context.Connection.RemoteIpAddress}:{context.Request.Path}",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+});
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(
     connectionString,
     postgres =>
@@ -43,6 +62,7 @@ builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddSingleton<IRentalState, RequestedState>();
 builder.Services.AddSingleton<IRentalState, ApprovedState>();
 builder.Services.AddSingleton<IRentalState, RejectedState>();
+builder.Services.AddSingleton<IRentalState, CancelledState>();
 builder.Services.AddSingleton<IRentalState, OutForRentState>();
 builder.Services.AddSingleton<IRentalState, OverdueState>();
 builder.Services.AddSingleton<IRentalState, ReturnedState>();
@@ -73,7 +93,10 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 // Presentation point: exception mapping runs before the endpoint pipeline so
 // service-layer exceptions become consistent HTTP Problem Details responses.
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseExceptionHandler();
+app.UseRateLimiter();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -84,6 +107,11 @@ app.UseAuthorization();
 // Presentation point: only health and authentication entry points are anonymous;
 // each feature endpoint group applies RequireAuthorization at its boundary.
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" })).AllowAnonymous();
+app.MapGet("/health/live", () => Results.Ok(new { status = "alive" })).AllowAnonymous();
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("ready")
+}).AllowAnonymous();
 app.MapAuthEndpoints();
 app.MapItemEndpoints();
 app.MapRentalEndpoints();

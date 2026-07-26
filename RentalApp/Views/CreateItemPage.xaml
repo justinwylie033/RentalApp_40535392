@@ -6,7 +6,8 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12" MaximumWidthRequest="720">
             <VerticalStackLayout>
-                <Label Text="List an item" Style="{StaticResource PageTitle}" />
+                <Label Text="List an item" Style="{StaticResource PageTitle}"
+                       SemanticProperties.HeadingLevel="Level1" />
                 <Label Text="Create a clear, trustworthy listing for your community."
                        Style="{StaticResource MutedLabel}" />
             </VerticalStackLayout>

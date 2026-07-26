@@ -11,10 +11,18 @@ public sealed class ClientServiceTests
     {
         var itemId = Guid.NewGuid();
         var detail = CreateItemDetail(itemId);
-        IReadOnlyList<ItemSummaryDto> items = [CreateItemSummary(itemId)];
+        IReadOnlyList<ItemSummaryDto> itemSummaries = [CreateItemSummary(itemId)];
+        var items = new PagedResult<ItemSummaryDto>(itemSummaries, 1, 20, 1);
         var api = new Mock<IApiClient>();
-        api.Setup(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        api.Setup(client => client.GetAsync<PagedResult<ItemSummaryDto>>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(items);
+        api.Setup(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
+                "items/mine", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(itemSummaries);
+        api.Setup(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
+                "items/nearby?latitude=55.95&longitude=-3.18&radiusKm=5&category=Tools",
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(itemSummaries);
         api.Setup(client => client.GetAsync<ItemDetailDto>($"items/{itemId}", It.IsAny<CancellationToken>()))
             .ReturnsAsync(detail);
         api.Setup(client => client.PostAsync<CreateItemRequest, ItemDetailDto>(
@@ -31,17 +39,20 @@ public sealed class ClientServiceTests
             "Drill", "An updated test drill.", 9m, ItemCategory.Tools,
             55.95, -3.18, true, "12 Test Street, Edinburgh, EH1 1AA");
 
-        Assert.Single(await service.GetAllAsync());
-        Assert.Single(await service.GetAllAsync(ItemCategory.Tools));
+        Assert.Single((await service.GetAllAsync()).Items);
+        Assert.Single((await service.GetAllAsync(ItemCategory.Tools)).Items);
+        Assert.Single(await service.GetMineAsync());
         Assert.Single(await service.FindNearbyAsync(55.95, -3.18, 5, ItemCategory.Tools));
         Assert.Equal(detail, await service.GetAsync(itemId));
         Assert.Equal(detail, await service.CreateAsync(create));
         Assert.Equal(detail, await service.UpdateAsync(itemId, update));
 
+        api.Verify(client => client.GetAsync<PagedResult<ItemSummaryDto>>(
+            "items/?sort=Newest&page=1&pageSize=20", It.IsAny<CancellationToken>()), Times.Once);
+        api.Verify(client => client.GetAsync<PagedResult<ItemSummaryDto>>(
+            "items/?category=Tools&sort=Newest&page=1&pageSize=20", It.IsAny<CancellationToken>()), Times.Once);
         api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
-            "items/", It.IsAny<CancellationToken>()), Times.Once);
-        api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
-            "items/?category=Tools", It.IsAny<CancellationToken>()), Times.Once);
+            "items/mine", It.IsAny<CancellationToken>()), Times.Once);
         api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
             "items/nearby?latitude=55.95&longitude=-3.18&radiusKm=5&category=Tools",
             It.IsAny<CancellationToken>()), Times.Once);
@@ -59,6 +70,9 @@ public sealed class ClientServiceTests
         api.Setup(client => client.GetAsync<IReadOnlyList<RentalSummaryDto>>(
                 It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(rentals);
+        api.Setup(client => client.GetAsync<IReadOnlyList<UnavailableDateRangeDto>>(
+                It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
         api.Setup(client => client.PatchAsync<UpdateRentalStatusRequest, RentalSummaryDto>(
                 $"rentals/{rental.Id}/status",
                 It.Is<UpdateRentalStatusRequest>(request => request.Status == RentalStatus.Approved),
@@ -70,6 +84,10 @@ public sealed class ClientServiceTests
         Assert.Equal(rental, await service.RequestAsync(request));
         Assert.Single(await service.GetIncomingAsync());
         Assert.Single(await service.GetOutgoingAsync());
+        Assert.Empty(await service.GetUnavailableDatesAsync(
+            rental.ItemId,
+            DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow.AddMonths(1)));
         Assert.Equal(RentalStatus.Approved, (await service.UpdateStatusAsync(rental.Id, RentalStatus.Approved)).Status);
 
         api.Verify(client => client.GetAsync<IReadOnlyList<RentalSummaryDto>>(

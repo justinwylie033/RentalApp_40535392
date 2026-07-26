@@ -46,9 +46,25 @@ public sealed class RentalRepository(AppDbContext context) : Repository<Rental>(
         Context.Rentals.AnyAsync(
             rental => rental.ItemId == itemId
                 && rental.Status != RentalStatus.Rejected
+                && rental.Status != RentalStatus.Cancelled
                 && startDateUtc <= rental.EndDateUtc
                 && endDateUtc >= rental.StartDateUtc,
             cancellationToken);
+
+    public async Task<IReadOnlyList<Rental>> GetUnavailableRangesAsync(
+        Guid itemId,
+        DateTimeOffset fromUtc,
+        DateTimeOffset toUtc,
+        CancellationToken cancellationToken = default) =>
+        await Context.Rentals
+            .AsNoTracking()
+            .Where(rental => rental.ItemId == itemId
+                && rental.Status != RentalStatus.Rejected
+                && rental.Status != RentalStatus.Cancelled
+                && fromUtc <= rental.EndDateUtc
+                && toUtc >= rental.StartDateUtc)
+            .OrderBy(rental => rental.StartDateUtc)
+            .ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<Rental>> GetOverdueCandidatesAsync(
         DateTimeOffset now,

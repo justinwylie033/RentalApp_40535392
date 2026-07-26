@@ -12,6 +12,7 @@ public static class RentalEndpoints
         group.MapPost("/", RequestAsync);
         group.MapGet("/incoming", GetIncomingAsync);
         group.MapGet("/outgoing", GetOutgoingAsync);
+        group.MapGet("/availability/{itemId:guid}", GetAvailabilityAsync);
         group.MapPatch("/{id:guid}/status", UpdateStatusAsync);
         return endpoints;
     }
@@ -37,6 +38,14 @@ public static class RentalEndpoints
         IRentalWorkflowService service,
         CancellationToken cancellationToken) =>
         Results.Ok(await service.GetOutgoingAsync(context.User.GetUserId(), cancellationToken));
+
+    private static async Task<IResult> GetAvailabilityAsync(
+        Guid itemId,
+        [FromQuery] DateTimeOffset fromUtc,
+        [FromQuery] DateTimeOffset toUtc,
+        IRentalWorkflowService service,
+        CancellationToken cancellationToken) =>
+        Results.Ok(await service.GetUnavailableDatesAsync(itemId, fromUtc, toUtc, cancellationToken));
 
     private static async Task<IResult> UpdateStatusAsync(
         Guid id,

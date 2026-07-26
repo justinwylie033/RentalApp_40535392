@@ -5,8 +5,16 @@ namespace RentalApp.Application.Services;
 /// <summary>Defines item catalogue operations used by mobile ViewModels.</summary>
 public interface IItemService
 {
-    /// <summary>Returns available listings, optionally filtered by category.</summary>
-    Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(ItemCategory? category = null, CancellationToken cancellationToken = default);
+    /// <summary>Returns available listings using server-side search, filtering and ordering.</summary>
+    Task<PagedResult<ItemSummaryDto>> GetAllAsync(
+        ItemCategory? category = null,
+        string? search = null,
+        ItemSortOrder sort = ItemSortOrder.Newest,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken cancellationToken = default);
+    /// <summary>Returns all listings created by the signed-in account.</summary>
+    Task<IReadOnlyList<ItemSummaryDto>> GetMineAsync(CancellationToken cancellationToken = default);
     /// <summary>Returns listings inside a radius of the supplied position.</summary>
     Task<IReadOnlyList<ItemSummaryDto>> FindNearbyAsync(
         double latitude,
@@ -24,12 +32,30 @@ public interface IItemService
 
 public sealed class ItemService(IApiClient api) : IItemService
 {
-    public Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(
+    public Task<PagedResult<ItemSummaryDto>> GetAllAsync(
         ItemCategory? category = null,
+        string? search = null,
+        ItemSortOrder sort = ItemSortOrder.Newest,
+        int page = 1,
+        int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        var path = category is null ? "items/" : $"items/?category={category}";
-        return api.GetAsync<IReadOnlyList<ItemSummaryDto>>(path, cancellationToken);
+        var query = new List<string>();
+        if (category is not null)
+        {
+            query.Add($"category={category}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query.Add($"search={Uri.EscapeDataString(search.Trim())}");
+        }
+
+        query.Add($"sort={sort}");
+        query.Add($"page={page}");
+        query.Add($"pageSize={pageSize}");
+        var path = $"items/?{string.Join("&", query)}";
+        return api.GetAsync<PagedResult<ItemSummaryDto>>(path, cancellationToken);
     }
 
     public Task<IReadOnlyList<ItemSummaryDto>> FindNearbyAsync(
@@ -48,6 +74,10 @@ public sealed class ItemService(IApiClient api) : IItemService
 
         return api.GetAsync<IReadOnlyList<ItemSummaryDto>>(path, cancellationToken);
     }
+
+    public Task<IReadOnlyList<ItemSummaryDto>> GetMineAsync(
+        CancellationToken cancellationToken = default) =>
+        api.GetAsync<IReadOnlyList<ItemSummaryDto>>("items/mine", cancellationToken);
 
     public Task<ItemDetailDto> GetAsync(Guid id, CancellationToken cancellationToken = default) =>
         api.GetAsync<ItemDetailDto>($"items/{id}", cancellationToken);
