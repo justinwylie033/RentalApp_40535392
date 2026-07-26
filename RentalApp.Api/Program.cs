@@ -93,6 +93,7 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 // Presentation point: exception mapping runs before the endpoint pipeline so
 // service-layer exceptions become consistent HTTP Problem Details responses.
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseExceptionHandler();
 app.UseRateLimiter();
 if (app.Environment.IsDevelopment())

@@ -67,6 +67,18 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ApiResponses_IncludeDefenceInDepthSecurityHeaders()
+    {
+        using var response = await _client.GetAsync("/health/live");
+
+        Assert.Equal("nosniff", Assert.Single(response.Headers.GetValues("X-Content-Type-Options")));
+        Assert.Equal("DENY", Assert.Single(response.Headers.GetValues("X-Frame-Options")));
+        Assert.Equal("no-referrer", Assert.Single(response.Headers.GetValues("Referrer-Policy")));
+        Assert.Contains("default-src 'none'", Assert.Single(
+            response.Headers.GetValues("Content-Security-Policy")), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task AuthenticationEndpoints_RegisterLoginRefreshAndProfile_CompleteRoundTrip()
     {
         var email = $"coverage-{Guid.NewGuid():N}@test.local";
