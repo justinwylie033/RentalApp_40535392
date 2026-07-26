@@ -48,6 +48,25 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task LoginEndpoint_RepeatedAttempts_ReturnsTooManyRequests()
+    {
+        HttpResponseMessage? finalResponse = null;
+        for (var attempt = 0; attempt < 11; attempt++)
+        {
+            finalResponse?.Dispose();
+            finalResponse = await _client.PostAsJsonAsync(
+                "/auth/token",
+                new LoginRequest("missing@example.com", "Incorrect123!"),
+                JsonOptions);
+        }
+
+        using (finalResponse)
+        {
+            Assert.Equal(HttpStatusCode.TooManyRequests, finalResponse!.StatusCode);
+        }
+    }
+
+    [Fact]
     public async Task AuthenticationEndpoints_RegisterLoginRefreshAndProfile_CompleteRoundTrip()
     {
         var email = $"coverage-{Guid.NewGuid():N}@test.local";
