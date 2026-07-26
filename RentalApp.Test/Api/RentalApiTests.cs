@@ -36,6 +36,18 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ReadinessEndpoint_PostgresAvailable_ReturnsHealthyStatus()
+    {
+        using var response = await _client.GetAsync("/health/ready");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains(
+            "Healthy",
+            await response.Content.ReadAsStringAsync(),
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task AuthenticationEndpoints_RegisterLoginRefreshAndProfile_CompleteRoundTrip()
     {
         var email = $"coverage-{Guid.NewGuid():N}@test.local";
