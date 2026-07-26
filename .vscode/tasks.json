@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start database and API",
+      "type": "shell",
+      "command": "docker compose up --build -d",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run tests",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["test", "RentalApp.Test/RentalApp.Test.csproj", "--collect:XPlat Code Coverage"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build Android app",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "RentalApp/RentalApp.csproj", "-c", "Debug"],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

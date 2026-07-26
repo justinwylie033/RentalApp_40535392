@@ -1,0 +1,54 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentalApp.Contracts", "RentalApp.Contracts\RentalApp.Contracts.csproj", "{76D61C36-9C3A-4A29-A728-C68B95E45001}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentalApp.Database", "RentalApp.Database\RentalApp.Database.csproj", "{76D61C36-9C3A-4A29-A728-C68B95E45002}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentalApp.Migrations", "RentalApp.Migrations\RentalApp.Migrations.csproj", "{76D61C36-9C3A-4A29-A728-C68B95E45003}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentalApp.Api", "RentalApp.Api\RentalApp.Api.csproj", "{76D61C36-9C3A-4A29-A728-C68B95E45004}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentalApp.Application", "RentalApp.Application\RentalApp.Application.csproj", "{76D61C36-9C3A-4A29-A728-C68B95E45005}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentalApp", "RentalApp\RentalApp.csproj", "{76D61C36-9C3A-4A29-A728-C68B95E45006}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentalApp.Test", "RentalApp.Test\RentalApp.Test.csproj", "{76D61C36-9C3A-4A29-A728-C68B95E45007}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{76D61C36-9C3A-4A29-A728-C68B95E45001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45001}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45002}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45002}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45003}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45004}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45005}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45005}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45006}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45006}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45006}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45006}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45007}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45007}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45007}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76D61C36-9C3A-4A29-A728-C68B95E45007}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

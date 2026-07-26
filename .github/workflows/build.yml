@@ -1,0 +1,167 @@
+name: Build, test and package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DOTNET_NOLOGO: "true"
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgis/postgis:16-3.5-alpine
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: app_user
+          POSTGRES_PASSWORD: app_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app_user -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_POSTGRES_CONNECTION: Host=localhost;Port=5432;Database=postgres;Username=app_user;Password=app_password
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Install .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore testable projects
+        run: dotnet restore RentalApp.Test/RentalApp.Test.csproj
+
+      - name: Build API and tests
+        run: >-
+          dotnet build RentalApp.Test/RentalApp.Test.csproj
+          -c Release
+          --no-restore
+          -p:ContinuousIntegrationBuild=true
+
+      - name: Run unit and PostGIS integration tests with coverage
+        run: >-
+          dotnet test RentalApp.Test/RentalApp.Test.csproj
+          -c Release
+          --no-build
+          --settings RentalApp.Test/coverage.runsettings
+          --collect:"XPlat Code Coverage"
+          --results-directory TestResults
+          --logger "trx;LogFileName=tests.trx"
+
+      - name: Enforce distinction coverage threshold
+        shell: python
+        run: |
+          import glob
+          import sys
+          import xml.etree.ElementTree as ET
+
+          reports = glob.glob(
+              "TestResults/**/coverage.cobertura.xml",
+              recursive=True,
+          )
+          if not reports:
+              sys.exit("No Cobertura coverage report was produced.")
+
+          line_rate = float(ET.parse(reports[0]).getroot().attrib["line-rate"])
+          percentage = line_rate * 100
+          print(f"Measured line coverage: {percentage:.1f}%")
+          if line_rate < 0.80:
+              sys.exit(
+                  f"Coverage {percentage:.1f}% is below the required 80.0%."
+              )
+
+      - name: Create readable coverage report
+        if: ${{ !cancelled() && hashFiles('TestResults/**/coverage.cobertura.xml') != '' }}
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:"Html;Cobertura;TextSummary"
+          cat TestResults/CoverageReport/Summary.txt
+
+      - name: Upload test and coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-and-coverage
+          path: TestResults/
+          if-no-files-found: error
+          retention-days: 14
+
+  android-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      RENTALAPP_CI_KEYSTORE_PASSWORD: rentalapp-${{ github.run_id }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Install Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install .NET 10 and MAUI Android
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+          workloads: maui-android
+
+      - name: Install Android API 36 dependencies
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "platforms;android-36" \
+            "build-tools;36.0.0"
+          test -f "$ANDROID_HOME/platforms/android-36/android.jar"
+
+      - name: Create CI signing key
+        run: >-
+          keytool -genkeypair -noprompt
+          -keystore "${{ github.workspace }}/rentalapp-ci.keystore"
+          -storepass "$RENTALAPP_CI_KEYSTORE_PASSWORD"
+          -keypass "$RENTALAPP_CI_KEYSTORE_PASSWORD"
+          -alias rentalapp
+          -keyalg RSA
+          -keysize 2048
+          -validity 3650
+          -dname "CN=RentalApp CI, OU=Coursework, O=Edinburgh Napier, L=Edinburgh, C=GB"
+
+      - name: Restore and publish signed Android APK
+        run: >-
+          dotnet publish RentalApp/RentalApp.csproj
+          -c Release
+          -f net10.0-android
+          -p:AndroidPackageFormats=apk
+          -p:AndroidKeyStore=true
+          -p:AndroidSigningKeyStore="${{ github.workspace }}/rentalapp-ci.keystore"
+          -p:AndroidSigningKeyAlias=rentalapp
+          -p:AndroidSigningKeyPass=env:RENTALAPP_CI_KEYSTORE_PASSWORD
+          -p:AndroidSigningStorePass=env:RENTALAPP_CI_KEYSTORE_PASSWORD
+          -p:ContinuousIntegrationBuild=true
+
+      - name: Upload Android package
+        uses: actions/upload-artifact@v7
+        with:
+          name: rentalapp-android
+          path: RentalApp/bin/Release/net10.0-android/publish/*-Signed.apk
+          if-no-files-found: error
+          retention-days: 14

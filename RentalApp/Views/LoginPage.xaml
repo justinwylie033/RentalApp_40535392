@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RentalApp.Views.LoginPage"
+             Shell.FlyoutBehavior="Disabled"
+             Shell.NavBarIsVisible="False"
+             Title="Welcome">
+    <ScrollView>
+        <VerticalStackLayout Padding="22,32" Spacing="16" MaximumWidthRequest="560">
+            <Border BackgroundColor="{StaticResource PrimaryDark}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 20"
+                    Padding="24">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="RentalApp" FontSize="34" FontAttributes="Bold" TextColor="White" />
+                    <Label Text="Borrow useful things from trusted people nearby."
+                           FontSize="16" TextColor="#DBEAFE" />
+                    <Label Text="Community rentals · secure accounts · local discovery"
+                           FontSize="12" TextColor="#BFDBFE" Margin="0,6,0,0" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="7">
+                    <Label Text="Sign in or create an account" Style="{StaticResource SectionTitle}" />
+                    <Label Text="For a new account, provide your display name before selecting Create account."
+                           Style="{StaticResource MutedLabel}" />
+
+                    <Label Text="DISPLAY NAME (NEW ACCOUNTS)" Style="{StaticResource InputLabel}" Margin="0,10,0,0" />
+                    <Entry Text="{Binding DisplayName}" Placeholder="Your name" MaxLength="80" />
+
+                    <Label Text="EMAIL" Style="{StaticResource InputLabel}" />
+                    <Entry Text="{Binding Email}" Keyboard="Email" Placeholder="name@example.com"
+                           AutomationId="EmailEntry" />
+
+                    <Label Text="PASSWORD" Style="{StaticResource InputLabel}" />
+                    <Entry Text="{Binding Password}" IsPassword="True" Placeholder="At least 8 characters"
+                           AutomationId="PasswordEntry" />
+
+                    <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorLabel}" />
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                                       Color="{StaticResource Primary}" />
+
+                    <Button Text="Sign in" Command="{Binding LoginCommand}" AutomationId="SignInButton" />
+                    <Button Text="Create account" Command="{Binding RegisterCommand}"
+                            Style="{StaticResource SecondaryButton}" AutomationId="RegisterButton" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border BackgroundColor="{StaticResource PrimaryLight}"
+                    Stroke="{StaticResource Primary}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 14"
+                    Padding="16">
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Presentation demo account" FontAttributes="Bold" TextColor="{StaticResource PrimaryDark}" />
+                        <Label Text="mike@example.com · Rental123!" Style="{StaticResource MutedLabel}" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1" Grid.RowSpan="2" Text="Use demo"
+                            Command="{Binding UseDemoAccountCommand}"
+                            Style="{StaticResource CompactButton}" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

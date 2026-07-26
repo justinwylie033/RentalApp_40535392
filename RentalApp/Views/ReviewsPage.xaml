@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RentalApp.Views.ReviewsPage"
+             Title="Reviews">
+    <Grid Padding="18" RowDefinitions="Auto,*,Auto" RowSpacing="10">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <VerticalStackLayout>
+                <Label Text="Verified reviews" Style="{StaticResource PageTitle}" />
+                <Label Text="Feedback is limited to completed rentals." Style="{StaticResource MutedLabel}" />
+            </VerticalStackLayout>
+            <Button Grid.Column="1" Text="Refresh" Command="{Binding RefreshCommand}"
+                    Style="{StaticResource CompactButton}" VerticalOptions="Center" />
+        </Grid>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Reviews}" EmptyView="No reviews have been submitted yet.">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="5">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="{Binding ReviewerName}" FontAttributes="Bold" FontSize="17" />
+                                <Label Grid.Column="1" Text="{Binding Rating, StringFormat='★ {0}/5'}"
+                                       FontAttributes="Bold" TextColor="{StaticResource PrimaryDark}" />
+                            </Grid>
+                            <Label Text="{Binding Comment}" LineBreakMode="WordWrap" />
+                            <Label Text="{Binding CreatedAtUtc, StringFormat='{0:dd/MM/yyyy}'}"
+                                   Style="{StaticResource MutedLabel}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Border Grid.Row="2" Style="{StaticResource Card}">
+            <VerticalStackLayout Spacing="7">
+                <Label Text="Add your review" Style="{StaticResource SectionTitle}" />
+                <Label Text="COMPLETED RENTAL" Style="{StaticResource InputLabel}" />
+                <Picker ItemsSource="{Binding EligibleRentals}"
+                        SelectedItem="{Binding SelectedRental}"
+                        ItemDisplayBinding="{Binding EndDateUtc, StringFormat='Completed {0:dd/MM/yyyy}'}"
+                        Title="Select an eligible rental" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Label Text="{Binding Rating, StringFormat='RATING: {0}/5'}"
+                           Style="{StaticResource InputLabel}" VerticalOptions="Center" />
+                    <Stepper Grid.Column="1" Minimum="1" Maximum="5" Increment="1"
+                             Value="{Binding Rating}" />
+                </Grid>
+                <Editor Text="{Binding Comment}" Placeholder="Describe the condition and your experience"
+                        HeightRequest="90" MaxLength="1000" />
+                <Button Text="Submit verified review" Command="{Binding SubmitCommand}" />
+                <Label Text="{Binding ConfirmationMessage}" Style="{StaticResource SuccessLabel}" />
+                <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorLabel}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                                   Color="{StaticResource Primary}" />
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

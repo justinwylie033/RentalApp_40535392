@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell x:Class="RentalApp.AppShell"
+       xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       FlyoutBehavior="Flyout"
+       Shell.FlyoutBackgroundColor="#F8FAFC"
+       Shell.BackgroundColor="#1E3A8A"
+       Shell.ForegroundColor="White"
+       Shell.TitleColor="White"
+       Shell.DisabledColor="#94A3B8"
+       Shell.UnselectedColor="#CBD5E1"
+       Shell.NavBarHasShadow="False">
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="#1E3A8A" Padding="22,26" HeightRequest="118">
+            <VerticalStackLayout VerticalOptions="Center">
+                <Label Text="RentalApp" TextColor="White" FontSize="25" FontAttributes="Bold" />
+                <Label Text="Community sharing made simple" TextColor="#DBEAFE" FontSize="13" />
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+    <Shell.FlyoutFooter>
+        <VerticalStackLayout Padding="16,8,16,18">
+            <BoxView HeightRequest="1" Color="#CBD5E1" Margin="0,0,0,10" />
+            <Button Text="Sign out"
+                    Clicked="OnSignOutClicked"
+                    Style="{StaticResource DangerButton}" />
+        </VerticalStackLayout>
+    </Shell.FlyoutFooter>
+</Shell>

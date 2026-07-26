@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RentalApp.Views.RentalsPage"
+             Title="Rentals">
+    <Grid Padding="16" RowDefinitions="Auto,Auto,*,Auto,*,Auto" RowSpacing="8">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <VerticalStackLayout>
+                <Label Text="Rental workflow" Style="{StaticResource PageTitle}" />
+                <Label Text="Select a rental to enable its next valid state transition."
+                       Style="{StaticResource MutedLabel}" />
+            </VerticalStackLayout>
+            <Button Grid.Column="1" Text="Refresh" Command="{Binding LoadCommand}"
+                    Style="{StaticResource CompactButton}" VerticalOptions="Center" />
+        </Grid>
+
+        <Label Grid.Row="1" Text="Requests for my listings" Style="{StaticResource SectionTitle}" />
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Incoming}" SelectedItem="{Binding SelectedIncomingRental}"
+                        SelectionMode="Single" EmptyView="No incoming rental requests.">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource Card}">
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="4">
+                            <Label Text="{Binding ItemTitle}" FontAttributes="Bold" FontSize="17" />
+                            <Label Grid.Column="1" Text="{Binding Status}" FontAttributes="Bold"
+                                   TextColor="{StaticResource PrimaryDark}" />
+                            <Label Grid.Row="1" Text="{Binding BorrowerName, StringFormat='Requested by: {0}'}"
+                                   Style="{StaticResource MutedLabel}" />
+                            <Label Grid.Row="2" Grid.ColumnSpan="2"
+                                   Text="{Binding StartDateUtc, StringFormat='From {0:dd/MM/yyyy}'}" />
+                            <Label Grid.Row="3" Grid.ColumnSpan="2"
+                                   Text="{Binding EndDateUtc, StringFormat='Until {0:dd/MM/yyyy}'}" />
+                            <Label Grid.Row="4" Text="{Binding TotalPrice, StringFormat='Total £{0:F2}'}"
+                                   FontAttributes="Bold" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Label Grid.Row="3" Text="My requests to rent" Style="{StaticResource SectionTitle}" />
+        <CollectionView Grid.Row="4" ItemsSource="{Binding Outgoing}" SelectedItem="{Binding SelectedOutgoingRental}"
+                        SelectionMode="Single" EmptyView="No outgoing rental requests.">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource Card}">
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="4">
+                            <Label Text="{Binding ItemTitle}" FontAttributes="Bold" FontSize="17" />
+                            <Label Grid.Column="1" Text="{Binding Status}" FontAttributes="Bold"
+                                   TextColor="{StaticResource PrimaryDark}" />
+                            <Label Grid.Row="1" Text="{Binding OwnerName, StringFormat='Listed by: {0}'}"
+                                   Style="{StaticResource MutedLabel}" />
+                            <Label Grid.Row="2" Grid.ColumnSpan="2"
+                                   Text="{Binding StartDateUtc, StringFormat='From {0:dd/MM/yyyy}'}" />
+                            <Label Grid.Row="3" Grid.ColumnSpan="2"
+                                   Text="{Binding EndDateUtc, StringFormat='Until {0:dd/MM/yyyy}'}" />
+                            <Label Grid.Row="4" Text="{Binding TotalPrice, StringFormat='Total £{0:F2}'}"
+                                   FontAttributes="Bold" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Border Grid.Row="5" Style="{StaticResource Card}" IsVisible="{Binding HasAnySelection}">
+            <VerticalStackLayout Spacing="7">
+                <VerticalStackLayout Spacing="7" IsVisible="{Binding HasIncomingSelection}">
+                    <Label Text="Listing request actions" Style="{StaticResource InputLabel}" />
+                    <Label Text="Only actions valid for this incoming rental are shown."
+                           Style="{StaticResource MutedLabel}" />
+                    <FlexLayout Wrap="Wrap" JustifyContent="Start" Direction="Row">
+                        <Button Text="Approve request" Command="{Binding ApproveCommand}"
+                                IsVisible="{Binding CanApproveSelected}" Margin="2"
+                                Style="{StaticResource CompactButton}" />
+                        <Button Text="Reject request" Command="{Binding RejectCommand}"
+                                IsVisible="{Binding CanRejectSelected}" Margin="2"
+                                Style="{StaticResource DangerButton}" />
+                        <Button Text="Confirm item collected" Command="{Binding MarkOutForRentCommand}"
+                                IsVisible="{Binding CanStartSelected}" Margin="2"
+                                Style="{StaticResource CompactButton}" />
+                        <Button Text="Complete returned rental" Command="{Binding CompleteCommand}"
+                                IsVisible="{Binding CanCompleteSelected}" Margin="2"
+                                Style="{StaticResource CompactButton}" />
+                    </FlexLayout>
+                    <Label Text="No action is required for this listing request."
+                           IsVisible="{Binding ListingSelectionHasNoAction}"
+                           Style="{StaticResource MutedLabel}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="7" IsVisible="{Binding HasOutgoingSelection}">
+                    <Label Text="My request actions" Style="{StaticResource InputLabel}" />
+                    <Label Text="{Binding RequestGuidance}"
+                           Style="{StaticResource MutedLabel}" />
+                    <Button Text="I returned the item" Command="{Binding MarkReturnedCommand}"
+                            IsVisible="{Binding CanReturnSelected}" Margin="2"
+                            Style="{StaticResource CompactButton}" />
+                    <Button Text="Leave verified review" Command="{Binding ReviewCommand}"
+                            IsVisible="{Binding CanReviewSelected}" Margin="2"
+                            Style="{StaticResource CompactButton}" />
+                </VerticalStackLayout>
+
+                <Label Text="{Binding ConfirmationMessage}" Style="{StaticResource SuccessLabel}" />
+                <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorLabel}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                                   Color="{StaticResource Primary}" />
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

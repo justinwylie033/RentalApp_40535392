@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RentalApp.Views.CreateItemPage"
+             Title="List an item">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12" MaximumWidthRequest="720">
+            <VerticalStackLayout>
+                <Label Text="List an item" Style="{StaticResource PageTitle}" />
+                <Label Text="Create a clear, trustworthy listing for your community."
+                       Style="{StaticResource MutedLabel}" />
+            </VerticalStackLayout>
+
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="7">
+                    <Label Text="Item details" Style="{StaticResource SectionTitle}" />
+                    <Label Text="TITLE" Style="{StaticResource InputLabel}" />
+                    <Entry Text="{Binding Title}" Placeholder="e.g. Cordless drill" MaxLength="120" />
+                    <Label Text="DESCRIPTION" Style="{StaticResource InputLabel}" />
+                    <Editor Text="{Binding Description}" Placeholder="Condition, accessories, and collection notes"
+                            HeightRequest="120" MaxLength="1500" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout>
+                            <Label Text="DAILY RATE (£)" Style="{StaticResource InputLabel}" />
+                            <Entry Text="{Binding DailyRate}" Keyboard="Numeric" Placeholder="0.00" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="CATEGORY" Style="{StaticResource InputLabel}" />
+                            <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="7">
+                    <Label Text="Collection location" Style="{StaticResource SectionTitle}" />
+                    <Label Text="Enter the address where the item will be collected. The app converts it into a PostGIS location."
+                           Style="{StaticResource MutedLabel}" />
+                    <Label Text="COLLECTION ADDRESS" Style="{StaticResource InputLabel}" />
+                    <Entry Text="{Binding Address}"
+                           Placeholder="e.g. 10 Princes Street, Edinburgh, EH2 2ER"
+                           MaxLength="250" ReturnType="Done" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Text="Find address" Command="{Binding FindAddressCommand}" />
+                        <Button Grid.Column="1" Text="Use current location"
+                                Command="{Binding UseCurrentLocationCommand}"
+                                Style="{StaticResource SecondaryButton}" />
+                    </Grid>
+                    <Label Text="{Binding LocationConfirmation}" Style="{StaticResource SuccessLabel}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorLabel}" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource Primary}" />
+            <Button Text="Publish listing" Command="{Binding SaveCommand}" AutomationId="PublishItemButton" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

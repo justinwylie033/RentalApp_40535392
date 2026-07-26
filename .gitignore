@@ -1,0 +1,17 @@
+bin/
+obj/
+.vs/
+.idea/
+.vscode/*.user
+TestResults/
+TestResultsLinux/
+coverage/
+*.user
+*.suo
+*.apk
+*.aab
+*.keystore
+*.zip
+.env
+RentalApp.Database/appsettings.json
+RentalApp.Api/appsettings.Local.json

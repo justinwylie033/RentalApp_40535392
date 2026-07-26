@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RentalApp.Views.NearbyItemsPage"
+             Title="Near me">
+    <Grid Padding="18" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
+        <VerticalStackLayout>
+            <Label Text="Find near me" Style="{StaticResource PageTitle}" />
+            <Label Text="Search PostGIS-powered listings around your current location."
+                   Style="{StaticResource MutedLabel}" />
+        </VerticalStackLayout>
+
+        <Border Grid.Row="1" Style="{StaticResource Card}">
+            <VerticalStackLayout Spacing="7">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="Search radius" Style="{StaticResource InputLabel}" />
+                    <Label Grid.Column="1" Text="{Binding RadiusKilometres, StringFormat='{0:F0} km'}"
+                           FontAttributes="Bold" TextColor="{StaticResource PrimaryDark}" />
+                </Grid>
+                <Slider Minimum="1" Maximum="25" Value="{Binding RadiusKilometres}"
+                        MinimumTrackColor="{StaticResource Primary}" MaximumTrackColor="{StaticResource Border}" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
+                            Title="Category" />
+                    <Button Grid.Column="1" Text="Search" Command="{Binding SearchCommand}" />
+                </Grid>
+                <Label Text="{Binding LocationSummary, StringFormat='Current location: {0}'}"
+                       Style="{StaticResource MutedLabel}" />
+            </VerticalStackLayout>
+        </Border>
+
+        <VerticalStackLayout Grid.Row="2" Spacing="4">
+            <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorLabel}" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource Primary}" />
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="3" ItemsSource="{Binding Items}" EmptyView="Choose a radius and search for nearby items.">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource Card}">
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="6">
+                            <Label Text="{Binding Title}" FontSize="19" FontAttributes="Bold" />
+                            <Label Grid.Column="1" Text="{Binding DistanceKm, StringFormat='{0:F1} km'}"
+                                   FontAttributes="Bold" TextColor="{StaticResource Accent}" />
+                            <Label Grid.Row="1" Text="{Binding Category}" Style="{StaticResource MutedLabel}" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding DailyRate, StringFormat='£{0:F2}/day'}" />
+                            <Label Grid.Row="2" Grid.ColumnSpan="2">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="★ {0:F1} ({1})">
+                                        <Binding Path="AverageRating" />
+                                        <Binding Path="ReviewCount" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                            <Label Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding Address}"
+                                   Style="{StaticResource MutedLabel}" LineBreakMode="TailTruncation" />
+                            <Button Grid.Row="4" Grid.ColumnSpan="2" Text="View details"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenItemCommand}"
+                                    CommandParameter="{Binding .}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

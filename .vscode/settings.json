@@ -1,0 +1,15 @@
+{
+  "dev.containers.mountWaylandSocket": false,
+  "remote.autoForwardPorts": false,
+  "remote.restoreForwardedPorts": false,
+  "remote.portsAttributes": {
+    "8080": {
+      "label": "Docker Compose API (host-managed)",
+      "onAutoForward": "ignore"
+    },
+    "5432": {
+      "label": "Docker Compose PostgreSQL (host-managed)",
+      "onAutoForward": "ignore"
+    }
+  }
+}

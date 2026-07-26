@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RentalApp.Views.ItemsListPage"
+             Title="Browse">
+    <Grid Padding="18" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
+        <VerticalStackLayout>
+            <Label Text="Browse items" Style="{StaticResource PageTitle}" />
+            <Label Text="Useful things available from people in your community."
+                   Style="{StaticResource MutedLabel}" />
+        </VerticalStackLayout>
+
+        <Border Grid.Row="1" Style="{StaticResource Card}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
+                        Title="Filter by category" />
+                <Button Grid.Column="1" Text="Refresh" Command="{Binding LoadCommand}"
+                        Style="{StaticResource CompactButton}" VerticalOptions="Center" />
+            </Grid>
+        </Border>
+
+        <VerticalStackLayout Grid.Row="2" Spacing="4">
+            <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorLabel}" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource Primary}" />
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="3" ItemsSource="{Binding Items}" EmptyView="No available items match this filter.">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource Card}">
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto"
+                              RowSpacing="6" ColumnSpacing="12">
+                            <Label Text="{Binding Title}" FontSize="19" FontAttributes="Bold" />
+                            <Label Grid.Column="1" Text="{Binding DailyRate, StringFormat='£{0:F2}/day'}"
+                                   FontAttributes="Bold" TextColor="{StaticResource PrimaryDark}" />
+                            <Label Grid.Row="1" Text="{Binding Category}" Style="{StaticResource MutedLabel}" />
+                            <Label Grid.Row="1" Grid.Column="1">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="★ {0:F1} ({1})">
+                                        <Binding Path="AverageRating" />
+                                        <Binding Path="ReviewCount" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                            <Label Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding OwnerName, StringFormat='Listed by {0}'}"
+                                   Style="{StaticResource MutedLabel}" />
+                            <Label Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding Address, StringFormat='Collection: {0}'}"
+                                   Style="{StaticResource MutedLabel}" LineBreakMode="TailTruncation" />
+                            <Button Grid.Row="4" Grid.ColumnSpan="2" Text="View details"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenItemCommand}"
+                                    CommandParameter="{Binding .}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

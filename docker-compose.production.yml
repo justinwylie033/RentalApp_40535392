@@ -1,0 +1,43 @@
+services:
+  database:
+    image: postgis/postgis:16-3.5-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-rentalapp}
+      POSTGRES_USER: ${POSTGRES_USER:-rentalapp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - rentalapp-production-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rentalapp} -d ${POSTGRES_DB:-rentalapp}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: RentalApp.Api/Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__DefaultConnection: Host=database;Port=5432;Database=${POSTGRES_DB:-rentalapp};Username=${POSTGRES_USER:-rentalapp};Password=${POSTGRES_PASSWORD}
+      Jwt__Issuer: ${JWT_ISSUER:-RentalApp.Api}
+      Jwt__Audience: ${JWT_AUDIENCE:-RentalApp.Maui}
+      Jwt__Secret: ${JWT_SECRET:?Set a random JWT_SECRET of at least 32 characters in .env}
+      Jwt__AccessTokenMinutes: ${JWT_ACCESS_TOKEN_MINUTES:-30}
+      Jwt__RefreshTokenDays: ${JWT_REFRESH_TOKEN_DAYS:-14}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  rentalapp-production-data:

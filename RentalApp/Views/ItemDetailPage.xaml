@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RentalApp.Views.ItemDetailPage"
+             Title="Item details">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12" MaximumWidthRequest="760">
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource Primary}" />
+            <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorLabel}" />
+            <Label Text="{Binding ConfirmationMessage}" Style="{StaticResource SuccessLabel}" />
+
+            <VerticalStackLayout IsVisible="{Binding IsViewing}" Spacing="10">
+                <Label Text="{Binding Item.Title}" Style="{StaticResource PageTitle}" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Border BackgroundColor="{StaticResource PrimaryLight}" StrokeThickness="0"
+                            StrokeShape="RoundRectangle 12" Padding="10,6" HorizontalOptions="Start">
+                        <Label Text="{Binding Item.Category}" TextColor="{StaticResource PrimaryDark}"
+                               FontAttributes="Bold" FontSize="13" />
+                    </Border>
+                    <Label Grid.Column="1" Text="{Binding Item.DailyRate, StringFormat='£{0:F2} / day'}"
+                           FontSize="19" FontAttributes="Bold" TextColor="{StaticResource PrimaryDark}"
+                           VerticalOptions="Center" />
+                </Grid>
+                <Label Text="{Binding Item.Description}" LineBreakMode="WordWrap" FontSize="16" />
+
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="7">
+                        <Label Text="Listing information" Style="{StaticResource SectionTitle}" />
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="14" RowSpacing="5">
+                            <Label Text="Listed by" Style="{StaticResource InputLabel}" />
+                            <Label Grid.Column="1" Text="{Binding Item.OwnerName}" />
+                            <Label Grid.Row="1" Text="Rating" Style="{StaticResource InputLabel}" />
+                            <Label Grid.Row="1" Grid.Column="1">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="★ {0:F1}/5 ({1})">
+                                        <Binding Path="Item.AverageRating" />
+                                        <Binding Path="Item.ReviewCount" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                            <Label Grid.Row="2" Text="Collection" Style="{StaticResource InputLabel}" />
+                            <Label Grid.Row="2" Grid.Column="1" Text="{Binding Item.Address}" LineBreakMode="WordWrap" />
+                        </Grid>
+                        <Button Text="Read reviews" Command="{Binding ViewReviewsCommand}"
+                                Style="{StaticResource SecondaryButton}" />
+                        <Button Text="Edit my listing" Command="{Binding BeginEditCommand}"
+                                IsVisible="{Binding IsOwner}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource Card}" IsVisible="{Binding CanRequestRental}">
+                    <VerticalStackLayout Spacing="9">
+                        <Label Text="Request this item" Style="{StaticResource SectionTitle}" />
+                        <Label Text="Choose inclusive rental dates. The final price is validated by the server."
+                               Style="{StaticResource MutedLabel}" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <VerticalStackLayout>
+                                <Label Text="START DATE" Style="{StaticResource InputLabel}" />
+                                <DatePicker Date="{Binding StartDate}"
+                                            MinimumDate="{Binding MinimumRentalDate}"
+                                            Format="dd/MM/yyyy" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Text="END DATE" Style="{StaticResource InputLabel}" />
+                                <DatePicker Date="{Binding EndDate}"
+                                            MinimumDate="{Binding MinimumRentalDate}"
+                                            Format="dd/MM/yyyy" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Button Text="Send rental request" Command="{Binding RequestRentalCommand}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border BackgroundColor="{StaticResource PrimaryLight}" StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12" Padding="14" IsVisible="{Binding IsOwner}">
+                    <Label Text="You listed this item. Use Edit my listing to update its details or availability."
+                           TextColor="{StaticResource PrimaryDark}" />
+                </Border>
+            </VerticalStackLayout>
+
+            <Border Style="{StaticResource Card}" IsVisible="{Binding IsEditing}">
+                <VerticalStackLayout Spacing="7">
+                    <Label Text="Edit listing" Style="{StaticResource PageTitle}" />
+                    <Label Text="TITLE" Style="{StaticResource InputLabel}" />
+                    <Entry Text="{Binding EditTitle}" MaxLength="120" />
+                    <Label Text="DESCRIPTION" Style="{StaticResource InputLabel}" />
+                    <Editor Text="{Binding EditDescription}" HeightRequest="110" MaxLength="1500" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout>
+                            <Label Text="DAILY RATE (£)" Style="{StaticResource InputLabel}" />
+                            <Entry Text="{Binding EditDailyRate}" Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="CATEGORY" Style="{StaticResource InputLabel}" />
+                            <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding EditCategory}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Label Text="COLLECTION ADDRESS" Style="{StaticResource InputLabel}" />
+                    <Entry Text="{Binding EditAddress}"
+                           Placeholder="Street, town and postcode"
+                           MaxLength="250" ReturnType="Done" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Text="Find address" Command="{Binding FindEditAddressCommand}" />
+                        <Button Grid.Column="1" Text="Use current location"
+                                Command="{Binding UseCurrentLocationForEditCommand}"
+                                Style="{StaticResource SecondaryButton}" />
+                    </Grid>
+                    <Label Text="{Binding EditLocationConfirmation}" Style="{StaticResource SuccessLabel}" />
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="Available for new rentals" VerticalOptions="Center" />
+                        <Switch IsToggled="{Binding EditIsAvailable}" />
+                    </HorizontalStackLayout>
+                    <Button Text="Save changes" Command="{Binding SaveChangesCommand}" />
+                    <Button Text="Cancel" Command="{Binding CancelEditCommand}"
+                            Style="{StaticResource SecondaryButton}" />
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

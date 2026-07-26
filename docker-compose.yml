@@ -1,0 +1,44 @@
+services:
+  database:
+    image: postgis/postgis:16-3.5-alpine
+    environment:
+      POSTGRES_DB: rentalapp
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - rentalapp-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d rentalapp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    restart: "on-failure:5"
+    build:
+      context: .
+      dockerfile: RentalApp.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__DefaultConnection: Host=database;Port=5432;Database=rentalapp;Username=app_user;Password=app_password
+      Jwt__Issuer: RentalApp.Api
+      Jwt__Audience: RentalApp.Maui
+      Jwt__Secret: local-docker-secret-change-before-deployment-2026
+      Jwt__AccessTokenMinutes: 30
+      Jwt__RefreshTokenDays: 14
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  rentalapp-postgres:
