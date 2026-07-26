@@ -8,6 +8,9 @@ namespace RentalApp.Application.ViewModels;
 
 public partial class ItemsListViewModel(IItemService items, INavigationService navigation) : ViewModelBase
 {
+    private const int PageSize = 20;
+    private int _currentPage = 1;
+
     public ObservableCollection<ItemSummaryDto> Items { get; } = [];
     public IReadOnlyList<string> Categories { get; } = ["All", .. Enum.GetNames<ItemCategory>()];
     public IReadOnlyList<ItemSortOrder> SortOrders { get; } = Enum.GetValues<ItemSortOrder>();
@@ -21,15 +24,49 @@ public partial class ItemsListViewModel(IItemService items, INavigationService n
     [ObservableProperty]
     private ItemSortOrder selectedSortOrder = ItemSortOrder.Newest;
 
+    [ObservableProperty]
+    private int totalResults;
+
+    [ObservableProperty]
+    private bool hasMoreItems;
+
     [RelayCommand]
-    private Task LoadAsync() => RunBusyAsync(async () =>
+    private Task LoadAsync() => LoadPageAsync(reset: true);
+
+    [RelayCommand]
+    private Task LoadMoreAsync() => HasMoreItems
+        ? LoadPageAsync(reset: false)
+        : Task.CompletedTask;
+
+    private Task LoadPageAsync(bool reset) => RunBusyAsync(async () =>
     {
+        if (reset)
+        {
+            _currentPage = 1;
+        }
+
         ItemCategory? category = Enum.TryParse<ItemCategory>(SelectedCategory, out var parsed) ? parsed : null;
-        var results = await items.GetAllAsync(category, SearchTerm, SelectedSortOrder);
-        Items.Clear();
-        foreach (var item in results)
+        var result = await items.GetAllAsync(
+            category,
+            SearchTerm,
+            SelectedSortOrder,
+            _currentPage,
+            PageSize);
+        if (reset)
+        {
+            Items.Clear();
+        }
+
+        foreach (var item in result.Items)
         {
             Items.Add(item);
+        }
+
+        TotalResults = result.TotalCount;
+        HasMoreItems = result.HasNextPage;
+        if (HasMoreItems)
+        {
+            _currentPage++;
         }
     });
 

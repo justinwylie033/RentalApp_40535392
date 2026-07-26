@@ -97,7 +97,7 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
 
         using var browseResponse = await SendAuthorizedAsync(HttpMethod.Get, "/items/", owner.AccessToken);
         Assert.Equal(HttpStatusCode.OK, browseResponse.StatusCode);
-        Assert.NotEmpty(await ReadAsync<List<ItemSummaryDto>>(browseResponse));
+        Assert.NotEmpty((await ReadAsync<PagedResult<ItemSummaryDto>>(browseResponse)).Items);
 
         var create = new CreateItemRequest(
             "Coverage pressure washer",
@@ -175,7 +175,7 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
         var owner = await LoginAsync("sarah@example.com", "Rental123!");
         var borrower = await LoginAsync("mike@example.com", "Rental123!");
         using var itemResponse = await SendAuthorizedAsync(HttpMethod.Get, "/items/", borrower.AccessToken);
-        var item = (await ReadAsync<List<ItemSummaryDto>>(itemResponse))
+        var item = (await ReadAsync<PagedResult<ItemSummaryDto>>(itemResponse)).Items
             .Single(candidate => candidate.Title == "18V Cordless Drill");
         var start = DateTimeOffset.UtcNow.Date.AddDays(20);
 
@@ -227,7 +227,7 @@ public sealed class RentalApiTests(DatabaseFixture database) : IAsyncLifetime
             HttpMethod.Get,
             "/items/",
             borrower.AccessToken);
-        var reviewedItem = (await ReadAsync<List<ItemSummaryDto>>(updatedItemsResponse))
+        var reviewedItem = (await ReadAsync<PagedResult<ItemSummaryDto>>(updatedItemsResponse)).Items
             .Single(candidate => candidate.Id == item.Id);
         Assert.Equal(5, reviewedItem.AverageRating);
         Assert.Equal(1, reviewedItem.ReviewCount);

@@ -12,10 +12,12 @@ public sealed class ItemRepository : Repository<Item>, IItemRepository
     {
     }
 
-    public async Task<IReadOnlyList<Item>> GetAvailableAsync(
+    public async Task<(IReadOnlyList<Item> Items, int TotalCount)> GetAvailableAsync(
         ItemCategory? category,
         string? search,
         ItemSortOrder sort,
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         IQueryable<Item> query = Context.Items
@@ -38,6 +40,8 @@ public sealed class ItemRepository : Repository<Item>, IItemRepository
                 || item.Address.ToLower().Contains(normalizedSearch));
         }
 
+        var totalCount = await query.CountAsync(cancellationToken);
+
         query = sort switch
         {
             ItemSortOrder.PriceLowToHigh => query
@@ -54,7 +58,12 @@ public sealed class ItemRepository : Repository<Item>, IItemRepository
             _ => query.OrderByDescending(item => item.CreatedAtUtc)
         };
 
-        return await query.ToListAsync(cancellationToken);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
     public async Task<Item?> GetDetailsAsync(

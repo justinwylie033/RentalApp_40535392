@@ -7,10 +7,12 @@ namespace RentalApp.Api.Services;
 
 public interface IItemApplicationService
 {
-    Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(
+    Task<PagedResult<ItemSummaryDto>> GetAllAsync(
         ItemCategory? category,
         string? search,
         ItemSortOrder sort,
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default);
     Task<ItemDetailDto> GetAsync(Guid id, CancellationToken cancellationToken = default);
     Task<ItemDetailDto> CreateAsync(Guid ownerId, CreateItemRequest request, CancellationToken cancellationToken = default);
@@ -30,10 +32,12 @@ public sealed class ItemApplicationService : IItemApplicationService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(
+    public async Task<PagedResult<ItemSummaryDto>> GetAllAsync(
         ItemCategory? category,
         string? search,
         ItemSortOrder sort,
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         if (search?.Trim().Length > 100)
@@ -41,9 +45,25 @@ public sealed class ItemApplicationService : IItemApplicationService
             throw new BusinessRuleException("Search text cannot exceed 100 characters.");
         }
 
-        var availableItems = await _items.GetAvailableAsync(category, search, sort, cancellationToken);
-        var response = availableItems.Select(item => item.ToSummary()).ToList();
-        return response;
+        if (page < 1)
+        {
+            throw new BusinessRuleException("Page must be at least 1.");
+        }
+
+        if (pageSize is < 1 or > 50)
+        {
+            throw new BusinessRuleException("Page size must be between 1 and 50.");
+        }
+
+        var result = await _items.GetAvailableAsync(
+            category,
+            search,
+            sort,
+            page,
+            pageSize,
+            cancellationToken);
+        var items = result.Items.Select(item => item.ToSummary()).ToList();
+        return new PagedResult<ItemSummaryDto>(items, page, pageSize, result.TotalCount);
     }
 
     public async Task<ItemDetailDto> GetAsync(Guid id, CancellationToken cancellationToken = default)

@@ -6,10 +6,12 @@ namespace RentalApp.Application.Services;
 public interface IItemService
 {
     /// <summary>Returns available listings using server-side search, filtering and ordering.</summary>
-    Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(
+    Task<PagedResult<ItemSummaryDto>> GetAllAsync(
         ItemCategory? category = null,
         string? search = null,
         ItemSortOrder sort = ItemSortOrder.Newest,
+        int page = 1,
+        int pageSize = 20,
         CancellationToken cancellationToken = default);
     /// <summary>Returns listings inside a radius of the supplied position.</summary>
     Task<IReadOnlyList<ItemSummaryDto>> FindNearbyAsync(
@@ -28,10 +30,12 @@ public interface IItemService
 
 public sealed class ItemService(IApiClient api) : IItemService
 {
-    public Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(
+    public Task<PagedResult<ItemSummaryDto>> GetAllAsync(
         ItemCategory? category = null,
         string? search = null,
         ItemSortOrder sort = ItemSortOrder.Newest,
+        int page = 1,
+        int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
         var query = new List<string>();
@@ -46,8 +50,10 @@ public sealed class ItemService(IApiClient api) : IItemService
         }
 
         query.Add($"sort={sort}");
+        query.Add($"page={page}");
+        query.Add($"pageSize={pageSize}");
         var path = $"items/?{string.Join("&", query)}";
-        return api.GetAsync<IReadOnlyList<ItemSummaryDto>>(path, cancellationToken);
+        return api.GetAsync<PagedResult<ItemSummaryDto>>(path, cancellationToken);
     }
 
     public Task<IReadOnlyList<ItemSummaryDto>> FindNearbyAsync(

@@ -107,9 +107,12 @@ public sealed class ItemApplicationServiceTests
         var results = await service.GetAllAsync(
             ItemCategory.Tools,
             "drill",
-            ItemSortOrder.PriceLowToHigh);
+            ItemSortOrder.PriceLowToHigh,
+            1,
+            20);
 
-        Assert.Equal([affordable.Id, expensive.Id], results.Select(item => item.Id));
+        Assert.Equal([affordable.Id, expensive.Id], results.Items.Select(item => item.Id));
+        Assert.Equal(2, results.TotalCount);
     }
 
     private static ItemApplicationService CreateService(RentalApp.Database.Data.AppDbContext context) =>

@@ -18,8 +18,10 @@ public sealed class ItemsListViewModelTests
                 null,
                 string.Empty,
                 ItemSortOrder.Newest,
+                1,
+                20,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync([expected]);
+            .ReturnsAsync(new PagedResult<ItemSummaryDto>([expected], 1, 20, 1));
         var viewModel = new ItemsListViewModel(service.Object, Mock.Of<INavigationService>());
 
         await viewModel.LoadCommand.ExecuteAsync(null);
@@ -39,6 +41,8 @@ public sealed class ItemsListViewModelTests
                 null,
                 string.Empty,
                 ItemSortOrder.Newest,
+                1,
+                20,
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("API unavailable"));
         var viewModel = new ItemsListViewModel(service.Object, Mock.Of<INavigationService>());
@@ -73,8 +77,10 @@ public sealed class ItemsListViewModelTests
                 ItemCategory.Tools,
                 "drill",
                 ItemSortOrder.PriceLowToHigh,
+                1,
+                20,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
+            .ReturnsAsync(new PagedResult<ItemSummaryDto>([], 1, 20, 0));
         var viewModel = new ItemsListViewModel(service.Object, Mock.Of<INavigationService>())
         {
             SelectedCategory = nameof(ItemCategory.Tools),
@@ -86,5 +92,29 @@ public sealed class ItemsListViewModelTests
 
         service.VerifyAll();
         Assert.Empty(viewModel.Items);
+    }
+
+    [Fact]
+    public async Task LoadMoreCommand_MorePages_AppendsNextPage()
+    {
+        var first = new ItemSummaryDto(
+            Guid.NewGuid(), Guid.NewGuid(), "Owner", "Drill", 8m, ItemCategory.Tools,
+            55.95, -3.18, true, 0, 0, null);
+        var second = first with { Id = Guid.NewGuid(), Title = "Saw" };
+        var service = new Mock<IItemService>();
+        service.Setup(candidate => candidate.GetAllAsync(
+                null, string.Empty, ItemSortOrder.Newest, 1, 20, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<ItemSummaryDto>([first], 1, 1, 2));
+        service.Setup(candidate => candidate.GetAllAsync(
+                null, string.Empty, ItemSortOrder.Newest, 2, 20, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<ItemSummaryDto>([second], 2, 1, 2));
+        var viewModel = new ItemsListViewModel(service.Object, Mock.Of<INavigationService>());
+
+        await viewModel.LoadCommand.ExecuteAsync(null);
+        await viewModel.LoadMoreCommand.ExecuteAsync(null);
+
+        Assert.Equal([first.Id, second.Id], viewModel.Items.Select(item => item.Id));
+        Assert.Equal(2, viewModel.TotalResults);
+        Assert.False(viewModel.HasMoreItems);
     }
 }

@@ -7,10 +7,12 @@ namespace RentalApp.Database.Data.Repositories;
 public interface IItemRepository : IRepository<Item>
 {
     /// <summary>Returns available items using the supplied catalogue filters and ordering.</summary>
-    Task<IReadOnlyList<Item>> GetAvailableAsync(
+    Task<(IReadOnlyList<Item> Items, int TotalCount)> GetAvailableAsync(
         ItemCategory? category,
         string? search,
         ItemSortOrder sort,
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default);
     /// <summary>Returns one item with the relationships needed by the API.</summary>
     Task<Item?> GetDetailsAsync(Guid id, CancellationToken cancellationToken = default);

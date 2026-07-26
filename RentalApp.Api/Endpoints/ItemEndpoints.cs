@@ -23,9 +23,17 @@ public static class ItemEndpoints
         [FromQuery] ItemCategory? category,
         [FromQuery] string? search,
         [FromQuery] ItemSortOrder sort,
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
         IItemApplicationService service,
         CancellationToken cancellationToken) =>
-        Results.Ok(await service.GetAllAsync(category, search, sort, cancellationToken));
+        Results.Ok(await service.GetAllAsync(
+            category,
+            search,
+            sort,
+            page ?? 1,
+            pageSize ?? 20,
+            cancellationToken));
 
     private static async Task<IResult> GetNearbyAsync(
         [FromQuery] double latitude,

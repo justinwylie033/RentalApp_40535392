@@ -11,9 +11,9 @@ public sealed class ClientServiceTests
     {
         var itemId = Guid.NewGuid();
         var detail = CreateItemDetail(itemId);
-        IReadOnlyList<ItemSummaryDto> items = [CreateItemSummary(itemId)];
+        var items = new PagedResult<ItemSummaryDto>([CreateItemSummary(itemId)], 1, 20, 1);
         var api = new Mock<IApiClient>();
-        api.Setup(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        api.Setup(client => client.GetAsync<PagedResult<ItemSummaryDto>>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(items);
         api.Setup(client => client.GetAsync<ItemDetailDto>($"items/{itemId}", It.IsAny<CancellationToken>()))
             .ReturnsAsync(detail);
@@ -31,17 +31,17 @@ public sealed class ClientServiceTests
             "Drill", "An updated test drill.", 9m, ItemCategory.Tools,
             55.95, -3.18, true, "12 Test Street, Edinburgh, EH1 1AA");
 
-        Assert.Single(await service.GetAllAsync());
-        Assert.Single(await service.GetAllAsync(ItemCategory.Tools));
+        Assert.Single((await service.GetAllAsync()).Items);
+        Assert.Single((await service.GetAllAsync(ItemCategory.Tools)).Items);
         Assert.Single(await service.FindNearbyAsync(55.95, -3.18, 5, ItemCategory.Tools));
         Assert.Equal(detail, await service.GetAsync(itemId));
         Assert.Equal(detail, await service.CreateAsync(create));
         Assert.Equal(detail, await service.UpdateAsync(itemId, update));
 
-        api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
-            "items/?sort=Newest", It.IsAny<CancellationToken>()), Times.Once);
-        api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
-            "items/?category=Tools&sort=Newest", It.IsAny<CancellationToken>()), Times.Once);
+        api.Verify(client => client.GetAsync<PagedResult<ItemSummaryDto>>(
+            "items/?sort=Newest&page=1&pageSize=20", It.IsAny<CancellationToken>()), Times.Once);
+        api.Verify(client => client.GetAsync<PagedResult<ItemSummaryDto>>(
+            "items/?category=Tools&sort=Newest&page=1&pageSize=20", It.IsAny<CancellationToken>()), Times.Once);
         api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
             "items/nearby?latitude=55.95&longitude=-3.18&radiusKm=5&category=Tools",
             It.IsAny<CancellationToken>()), Times.Once);
