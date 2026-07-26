@@ -46,6 +46,7 @@ public sealed class RentalRepository(AppDbContext context) : Repository<Rental>(
         Context.Rentals.AnyAsync(
             rental => rental.ItemId == itemId
                 && rental.Status != RentalStatus.Rejected
+                && rental.Status != RentalStatus.Cancelled
                 && startDateUtc <= rental.EndDateUtc
                 && endDateUtc >= rental.StartDateUtc,
             cancellationToken);

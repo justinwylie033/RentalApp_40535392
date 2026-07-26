@@ -25,6 +25,7 @@ public enum RentalStatus
     Requested,
     Approved,
     Rejected,
+    Cancelled,
     OutForRent,
     Overdue,
     Returned,

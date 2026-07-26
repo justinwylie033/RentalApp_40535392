@@ -94,6 +94,9 @@
                     <Button Text="I returned the item" Command="{Binding MarkReturnedCommand}"
                             IsVisible="{Binding CanReturnSelected}" Margin="2"
                             Style="{StaticResource CompactButton}" />
+                    <Button Text="Cancel request" Command="{Binding CancelCommand}"
+                            IsVisible="{Binding CanCancelSelected}" Margin="2"
+                            Style="{StaticResource DangerButton}" />
                     <Button Text="Leave verified review" Command="{Binding ReviewCommand}"
                             IsVisible="{Binding CanReviewSelected}" Margin="2"
                             Style="{StaticResource CompactButton}" />

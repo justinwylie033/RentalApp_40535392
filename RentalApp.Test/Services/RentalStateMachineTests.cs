@@ -12,6 +12,7 @@ public sealed class RentalStateMachineTests
         new RequestedState(),
         new ApprovedState(),
         new RejectedState(),
+        new CancelledState(),
         new OutForRentState(),
         new OverdueState(),
         new ReturnedState(),
@@ -22,6 +23,8 @@ public sealed class RentalStateMachineTests
     // Each InlineData row is reported as a separate executed xUnit test case.
     [InlineData(RentalStatus.Requested, RentalStatus.Approved)]
     [InlineData(RentalStatus.Requested, RentalStatus.Rejected)]
+    [InlineData(RentalStatus.Requested, RentalStatus.Cancelled)]
+    [InlineData(RentalStatus.Approved, RentalStatus.Cancelled)]
     [InlineData(RentalStatus.Approved, RentalStatus.OutForRent)]
     [InlineData(RentalStatus.OutForRent, RentalStatus.Returned)]
     [InlineData(RentalStatus.OutForRent, RentalStatus.Overdue)]
@@ -41,6 +44,7 @@ public sealed class RentalStateMachineTests
     // terminal and role-driven workflow states cannot be skipped.
     [InlineData(RentalStatus.Requested, RentalStatus.Completed)]
     [InlineData(RentalStatus.Rejected, RentalStatus.Approved)]
+    [InlineData(RentalStatus.Cancelled, RentalStatus.Approved)]
     [InlineData(RentalStatus.Completed, RentalStatus.Requested)]
     [InlineData(RentalStatus.Returned, RentalStatus.Approved)]
     public void EnsureValidTransition_InvalidTransition_Throws(

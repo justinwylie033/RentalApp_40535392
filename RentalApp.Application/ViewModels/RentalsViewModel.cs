@@ -63,6 +63,11 @@ public partial class RentalsViewModel : ViewModelBase
         && rental.BorrowerId == _currentUserId
         && rental.Status == RentalStatus.Completed;
 
+    public bool CanCancelSelected =>
+        SelectedOutgoingRental is { } rental
+        && rental.BorrowerId == _currentUserId
+        && rental.Status is RentalStatus.Requested or RentalStatus.Approved;
+
     public string RequestGuidance => SelectedOutgoingRental?.Status switch
     {
         RentalStatus.Requested => "Waiting for the person who listed the item to respond.",
@@ -72,6 +77,7 @@ public partial class RentalsViewModel : ViewModelBase
         RentalStatus.Returned => "Return recorded. Waiting for final confirmation.",
         RentalStatus.Completed => "Rental complete. You can now leave a verified review.",
         RentalStatus.Rejected => "This rental request was declined.",
+        RentalStatus.Cancelled => "You cancelled this rental request.",
         _ => string.Empty
     };
 
@@ -126,6 +132,9 @@ public partial class RentalsViewModel : ViewModelBase
             });
     });
 
+    [RelayCommand(CanExecute = nameof(CanCancel))]
+    private Task CancelAsync() => ChangeStatusAsync(RentalStatus.Cancelled);
+
     private bool CanApprove() => CanApproveSelected;
 
     private bool CanReject() => CanRejectSelected;
@@ -137,6 +146,8 @@ public partial class RentalsViewModel : ViewModelBase
     private bool CanComplete() => CanCompleteSelected;
 
     private bool CanReview() => CanReviewSelected;
+
+    private bool CanCancel() => CanCancelSelected;
 
     private Task ChangeStatusAsync(RentalStatus status) => RunBusyAsync(async () =>
     {
@@ -211,6 +222,7 @@ public partial class RentalsViewModel : ViewModelBase
         OnPropertyChanged(nameof(CanReturnSelected));
         OnPropertyChanged(nameof(CanCompleteSelected));
         OnPropertyChanged(nameof(CanReviewSelected));
+        OnPropertyChanged(nameof(CanCancelSelected));
         OnPropertyChanged(nameof(RequestGuidance));
         OnPropertyChanged(nameof(ListingSelectionHasNoAction));
 
@@ -220,6 +232,7 @@ public partial class RentalsViewModel : ViewModelBase
         MarkReturnedCommand.NotifyCanExecuteChanged();
         CompleteCommand.NotifyCanExecuteChanged();
         ReviewCommand.NotifyCanExecuteChanged();
+        CancelCommand.NotifyCanExecuteChanged();
     }
 
     private static void Replace(

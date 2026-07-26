@@ -159,6 +159,10 @@ public sealed class RentalWorkflowService : IRentalWorkflowService
         {
             permitted = isOwner;
         }
+        else if (nextStatus == RentalStatus.Cancelled)
+        {
+            permitted = isBorrower;
+        }
         else if (nextStatus == RentalStatus.Returned)
         {
             permitted = isBorrower;

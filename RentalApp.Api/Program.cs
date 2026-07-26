@@ -43,6 +43,7 @@ builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddSingleton<IRentalState, RequestedState>();
 builder.Services.AddSingleton<IRentalState, ApprovedState>();
 builder.Services.AddSingleton<IRentalState, RejectedState>();
+builder.Services.AddSingleton<IRentalState, CancelledState>();
 builder.Services.AddSingleton<IRentalState, OutForRentState>();
 builder.Services.AddSingleton<IRentalState, OverdueState>();
 builder.Services.AddSingleton<IRentalState, ReturnedState>();

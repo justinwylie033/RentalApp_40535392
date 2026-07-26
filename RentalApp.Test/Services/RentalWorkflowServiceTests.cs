@@ -91,6 +91,30 @@ public sealed class RentalWorkflowServiceTests
     }
 
     [Fact]
+    public async Task TransitionAsync_BorrowerCancelsApprovedRental_ReleasesDates()
+    {
+        await using var context = TestContextFactory.Create();
+        var data = await SeedUsersAndItemAsync(context);
+        var service = CreateService(context);
+        var start = DateTimeOffset.UtcNow.Date.AddDays(5);
+        var rental = await service.RequestAsync(
+            data.Borrower.Id,
+            new CreateRentalRequest(data.Item.Id, start, start.AddDays(1)));
+        await service.TransitionAsync(data.Owner.Id, rental.Id, RentalStatus.Approved);
+
+        var cancelled = await service.TransitionAsync(
+            data.Borrower.Id,
+            rental.Id,
+            RentalStatus.Cancelled);
+        var replacement = await service.RequestAsync(
+            data.SecondBorrower.Id,
+            new CreateRentalRequest(data.Item.Id, start, start.AddDays(1)));
+
+        Assert.Equal(RentalStatus.Cancelled, cancelled.Status);
+        Assert.Equal(RentalStatus.Requested, replacement.Status);
+    }
+
+    [Fact]
     public async Task MarkOverdueAsync_ExpiredOutForRentRental_TransitionsAutomatically()
     {
         await using var context = TestContextFactory.Create();
@@ -121,6 +145,7 @@ public sealed class RentalWorkflowServiceTests
         var machine = new RentalStateMachine(
         [
             new RequestedState(), new ApprovedState(), new RejectedState(),
+            new CancelledState(),
             new OutForRentState(), new OverdueState(), new ReturnedState(), new CompletedState()
         ]);
         return new RentalWorkflowService(rentalRepository, itemRepository, new UnitOfWork(context), machine);

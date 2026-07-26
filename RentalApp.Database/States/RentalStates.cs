@@ -24,7 +24,7 @@ public abstract class RentalState : IRentalState
 public sealed class RequestedState : RentalState
 {
     public RequestedState()
-        : base(RentalStatus.Approved, RentalStatus.Rejected)
+        : base(RentalStatus.Approved, RentalStatus.Rejected, RentalStatus.Cancelled)
     {
     }
 
@@ -34,7 +34,7 @@ public sealed class RequestedState : RentalState
 public sealed class ApprovedState : RentalState
 {
     public ApprovedState()
-        : base(RentalStatus.OutForRent, RentalStatus.Rejected)
+        : base(RentalStatus.OutForRent, RentalStatus.Rejected, RentalStatus.Cancelled)
     {
     }
 
@@ -44,6 +44,11 @@ public sealed class ApprovedState : RentalState
 public sealed class RejectedState : RentalState
 {
     public override RentalStatus Status => RentalStatus.Rejected;
+}
+
+public sealed class CancelledState : RentalState
+{
+    public override RentalStatus Status => RentalStatus.Cancelled;
 }
 
 public sealed class OutForRentState : RentalState
