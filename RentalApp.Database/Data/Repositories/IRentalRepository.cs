@@ -17,6 +17,12 @@ public interface IRentalRepository : IRepository<Rental>
         DateTimeOffset startDateUtc,
         DateTimeOffset endDateUtc,
         CancellationToken cancellationToken = default);
+    /// <summary>Returns active booking ranges that intersect the requested window.</summary>
+    Task<IReadOnlyList<Rental>> GetUnavailableRangesAsync(
+        Guid itemId,
+        DateTimeOffset fromUtc,
+        DateTimeOffset toUtc,
+        CancellationToken cancellationToken = default);
     /// <summary>Returns out-for-rent records whose due date has passed.</summary>
     Task<IReadOnlyList<Rental>> GetOverdueCandidatesAsync(
         DateTimeOffset now,

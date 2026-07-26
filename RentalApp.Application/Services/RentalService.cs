@@ -7,6 +7,11 @@ public interface IRentalService
     Task<RentalSummaryDto> RequestAsync(CreateRentalRequest request, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<RentalSummaryDto>> GetIncomingAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<RentalSummaryDto>> GetOutgoingAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<UnavailableDateRangeDto>> GetUnavailableDatesAsync(
+        Guid itemId,
+        DateTimeOffset fromUtc,
+        DateTimeOffset toUtc,
+        CancellationToken cancellationToken = default);
     Task<RentalSummaryDto> UpdateStatusAsync(Guid rentalId, RentalStatus status, CancellationToken cancellationToken = default);
 }
 
@@ -22,6 +27,17 @@ public sealed class RentalService(IApiClient api) : IRentalService
 
     public Task<IReadOnlyList<RentalSummaryDto>> GetOutgoingAsync(CancellationToken cancellationToken = default) =>
         api.GetAsync<IReadOnlyList<RentalSummaryDto>>("rentals/outgoing", cancellationToken);
+
+    public Task<IReadOnlyList<UnavailableDateRangeDto>> GetUnavailableDatesAsync(
+        Guid itemId,
+        DateTimeOffset fromUtc,
+        DateTimeOffset toUtc,
+        CancellationToken cancellationToken = default)
+    {
+        var path = FormattableString.Invariant(
+            $"rentals/availability/{itemId}?fromUtc={Uri.EscapeDataString(fromUtc.ToString("O"))}&toUtc={Uri.EscapeDataString(toUtc.ToString("O"))}");
+        return api.GetAsync<IReadOnlyList<UnavailableDateRangeDto>>(path, cancellationToken);
+    }
 
     public Task<RentalSummaryDto> UpdateStatusAsync(
         Guid rentalId,

@@ -54,6 +54,17 @@
                         <Label Text="Request this item" Style="{StaticResource SectionTitle}" />
                         <Label Text="Choose inclusive rental dates. The final price is validated by the server."
                                Style="{StaticResource MutedLabel}" />
+                        <Border BackgroundColor="{StaticResource PrimaryLight}"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 10"
+                                Padding="10">
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="Unavailable dates" Style="{StaticResource InputLabel}" />
+                                <Label Text="{Binding AvailabilitySummary}"
+                                       TextColor="{StaticResource PrimaryDark}"
+                                       LineBreakMode="WordWrap" />
+                            </VerticalStackLayout>
+                        </Border>
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                             <VerticalStackLayout>
                                 <Label Text="START DATE" Style="{StaticResource InputLabel}" />

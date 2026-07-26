@@ -138,6 +138,28 @@ public sealed class RentalWorkflowServiceTests
         Assert.Equal(RentalStatus.Overdue, rental.Status);
     }
 
+    [Fact]
+    public async Task GetUnavailableDatesAsync_RejectedAndCancelledRentals_AreExcluded()
+    {
+        await using var context = TestContextFactory.Create();
+        var data = await SeedUsersAndItemAsync(context);
+        var start = DateTimeOffset.UtcNow.Date.AddDays(10);
+        context.Rentals.AddRange(
+            CreateRental(data, start, RentalStatus.Approved),
+            CreateRental(data, start.AddDays(3), RentalStatus.Rejected),
+            CreateRental(data, start.AddDays(6), RentalStatus.Cancelled));
+        await context.SaveChangesAsync();
+        var service = CreateService(context);
+
+        var results = await service.GetUnavailableDatesAsync(
+            data.Item.Id,
+            start.AddDays(-1),
+            start.AddDays(10));
+
+        var range = Assert.Single(results);
+        Assert.Equal(start, range.StartDateUtc);
+    }
+
     private static RentalWorkflowService CreateService(AppDbContext context)
     {
         var itemRepository = new ItemRepository(context);
@@ -170,4 +192,17 @@ public sealed class RentalWorkflowServiceTests
         await context.SaveChangesAsync();
         return (owner, borrower, secondBorrower, item);
     }
+
+    private static Rental CreateRental(
+        (User Owner, User Borrower, User SecondBorrower, Item Item) data,
+        DateTimeOffset start,
+        RentalStatus status) => new()
+    {
+        Item = data.Item,
+        Borrower = data.Borrower,
+        StartDateUtc = start,
+        EndDateUtc = start.AddDays(1),
+        TotalPrice = 20m,
+        Status = status
+    };
 }

@@ -7,6 +7,10 @@ public sealed record CreateRentalRequest(
 
 public sealed record UpdateRentalStatusRequest(RentalStatus Status);
 
+public sealed record UnavailableDateRangeDto(
+    DateTimeOffset StartDateUtc,
+    DateTimeOffset EndDateUtc);
+
 public sealed record RentalSummaryDto(
     Guid Id,
     Guid ItemId,

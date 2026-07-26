@@ -105,6 +105,48 @@ public sealed class ItemDetailViewModelTests
             It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    [Fact]
+    public async Task RequestRentalCommand_SelectedDatesUnavailable_StopsBeforeApiRequest()
+    {
+        var ownerId = Guid.NewGuid();
+        var item = CreateItem(ownerId);
+        var items = new Mock<IItemService>();
+        items.Setup(service => service.GetAsync(item.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(item);
+        var authentication = new Mock<IAuthenticationService>();
+        authentication.Setup(service => service.GetProfileAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new UserProfileDto(Guid.NewGuid(), "Borrower", "borrower@test.local", 0, 0));
+        var bookedStart = DateTime.Today.AddDays(4);
+        var rentals = new Mock<IRentalService>();
+        rentals.Setup(service => service.GetUnavailableDatesAsync(
+                item.Id,
+                It.IsAny<DateTimeOffset>(),
+                It.IsAny<DateTimeOffset>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([
+                new UnavailableDateRangeDto(
+                    new DateTimeOffset(bookedStart, TimeSpan.Zero),
+                    new DateTimeOffset(bookedStart.AddDays(2), TimeSpan.Zero))
+            ]);
+        var viewModel = new ItemDetailViewModel(
+            items.Object,
+            rentals.Object,
+            authentication.Object,
+            Mock.Of<IDeviceLocationService>(),
+            Mock.Of<IAddressGeocodingService>(),
+            Mock.Of<INavigationService>());
+        await viewModel.LoadAsync(item.Id);
+        viewModel.StartDate = bookedStart;
+        viewModel.EndDate = bookedStart.AddDays(1);
+
+        await viewModel.RequestRentalCommand.ExecuteAsync(null);
+
+        Assert.Contains("overlap", viewModel.ErrorMessage!, StringComparison.OrdinalIgnoreCase);
+        rentals.Verify(service => service.RequestAsync(
+            It.IsAny<CreateRentalRequest>(),
+            It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     private static ItemDetailDto CreateItem(Guid ownerId) => new(
         Guid.NewGuid(),
         ownerId,

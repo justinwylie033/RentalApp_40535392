@@ -20,6 +20,8 @@ public partial class ItemDetailViewModel(
     private double editLongitude;
 
     public IReadOnlyList<ItemCategory> Categories { get; } = Enum.GetValues<ItemCategory>();
+    public IReadOnlyList<UnavailableDateRangeDto> UnavailableDates => unavailableDates;
+    private readonly List<UnavailableDateRangeDto> unavailableDates = [];
 
     public DateTime MinimumRentalDate => DateTime.Today;
 
@@ -68,18 +70,34 @@ public partial class ItemDetailViewModel(
     public bool IsViewing => !IsEditing;
 
     public bool CanRequestRental => !IsOwner && Item?.IsAvailable == true;
+    public bool HasUnavailableDates => unavailableDates.Count > 0;
+    public string AvailabilitySummary => unavailableDates.Count == 0
+        ? "No existing bookings in the next six months."
+        : string.Join(
+            ", ",
+            unavailableDates.Select(range =>
+                $"{range.StartDateUtc.ToLocalTime():dd/MM/yyyy}–{range.EndDateUtc.ToLocalTime():dd/MM/yyyy}"));
 
     public Task LoadAsync(Guid itemId) => RunBusyAsync(async () =>
     {
         // Fetch item and profile concurrently to reduce the detail-screen wait time.
         var itemTask = items.GetAsync(itemId);
         var profileTask = authentication.GetProfileAsync();
-        await Task.WhenAll(itemTask, profileTask);
+        var availabilityTask = rentals.GetUnavailableDatesAsync(
+            itemId,
+            DateTimeOffset.UtcNow.Date,
+            DateTimeOffset.UtcNow.Date.AddMonths(6));
+        await Task.WhenAll(itemTask, profileTask, availabilityTask);
 
         var loadedItem = await itemTask;
         var profile = await profileTask;
         Item = loadedItem;
         IsOwner = loadedItem.OwnerId == profile.Id;
+        unavailableDates.Clear();
+        unavailableDates.AddRange(await availabilityTask ?? []);
+        OnPropertyChanged(nameof(UnavailableDates));
+        OnPropertyChanged(nameof(HasUnavailableDates));
+        OnPropertyChanged(nameof(AvailabilitySummary));
         IsEditing = false;
         CopyItemToEditor();
     });
@@ -154,6 +172,13 @@ public partial class ItemDetailViewModel(
         if (EndDate.Date < StartDate.Date)
         {
             throw new InvalidOperationException("The end date cannot be before the start date.");
+        }
+
+        if (unavailableDates.Any(range =>
+                StartDate.Date <= range.EndDateUtc.ToLocalTime().Date
+                && EndDate.Date >= range.StartDateUtc.ToLocalTime().Date))
+        {
+            throw new InvalidOperationException("Those dates overlap an existing booking. Choose another period.");
         }
 
         // DatePickers use local dates; the API contract uses UTC for consistent

@@ -62,6 +62,9 @@ public sealed class ClientServiceTests
         api.Setup(client => client.GetAsync<IReadOnlyList<RentalSummaryDto>>(
                 It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(rentals);
+        api.Setup(client => client.GetAsync<IReadOnlyList<UnavailableDateRangeDto>>(
+                It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
         api.Setup(client => client.PatchAsync<UpdateRentalStatusRequest, RentalSummaryDto>(
                 $"rentals/{rental.Id}/status",
                 It.Is<UpdateRentalStatusRequest>(request => request.Status == RentalStatus.Approved),
@@ -73,6 +76,10 @@ public sealed class ClientServiceTests
         Assert.Equal(rental, await service.RequestAsync(request));
         Assert.Single(await service.GetIncomingAsync());
         Assert.Single(await service.GetOutgoingAsync());
+        Assert.Empty(await service.GetUnavailableDatesAsync(
+            rental.ItemId,
+            DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow.AddMonths(1)));
         Assert.Equal(RentalStatus.Approved, (await service.UpdateStatusAsync(rental.Id, RentalStatus.Approved)).Status);
 
         api.Verify(client => client.GetAsync<IReadOnlyList<RentalSummaryDto>>(
