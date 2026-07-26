@@ -23,7 +23,7 @@ public static class ItemEndpoints
     private static async Task<IResult> GetAllAsync(
         [FromQuery] ItemCategory? category,
         [FromQuery] string? search,
-        [FromQuery] ItemSortOrder sort,
+        [FromQuery] ItemSortOrder? sort,
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
         IItemApplicationService service,
@@ -31,7 +31,7 @@ public static class ItemEndpoints
         Results.Ok(await service.GetAllAsync(
             category,
             search,
-            sort,
+            sort ?? ItemSortOrder.Newest,
             page ?? 1,
             pageSize ?? 20,
             cancellationToken));

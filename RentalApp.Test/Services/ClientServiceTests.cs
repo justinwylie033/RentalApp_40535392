@@ -11,10 +11,18 @@ public sealed class ClientServiceTests
     {
         var itemId = Guid.NewGuid();
         var detail = CreateItemDetail(itemId);
-        var items = new PagedResult<ItemSummaryDto>([CreateItemSummary(itemId)], 1, 20, 1);
+        IReadOnlyList<ItemSummaryDto> itemSummaries = [CreateItemSummary(itemId)];
+        var items = new PagedResult<ItemSummaryDto>(itemSummaries, 1, 20, 1);
         var api = new Mock<IApiClient>();
         api.Setup(client => client.GetAsync<PagedResult<ItemSummaryDto>>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(items);
+        api.Setup(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
+                "items/mine", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(itemSummaries);
+        api.Setup(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
+                "items/nearby?latitude=55.95&longitude=-3.18&radiusKm=5&category=Tools",
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(itemSummaries);
         api.Setup(client => client.GetAsync<ItemDetailDto>($"items/{itemId}", It.IsAny<CancellationToken>()))
             .ReturnsAsync(detail);
         api.Setup(client => client.PostAsync<CreateItemRequest, ItemDetailDto>(
