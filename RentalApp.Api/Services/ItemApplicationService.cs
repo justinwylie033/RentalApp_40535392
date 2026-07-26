@@ -41,20 +41,7 @@ public sealed class ItemApplicationService : IItemApplicationService
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        if (search?.Trim().Length > 100)
-        {
-            throw new BusinessRuleException("Search text cannot exceed 100 characters.");
-        }
-
-        if (page < 1)
-        {
-            throw new BusinessRuleException("Page must be at least 1.");
-        }
-
-        if (pageSize is < 1 or > 50)
-        {
-            throw new BusinessRuleException("Page size must be between 1 and 50.");
-        }
+        CatalogueRequestValidator.ValidateQuery(search, page, pageSize);
 
         var result = await _items.GetAvailableAsync(
             category,
@@ -87,7 +74,13 @@ public sealed class ItemApplicationService : IItemApplicationService
         CreateItemRequest request,
         CancellationToken cancellationToken = default)
     {
-        Validate(request.Title, request.Description, request.DailyRate, request.Address, request.Latitude, request.Longitude);
+        CatalogueRequestValidator.ValidateItem(
+            request.Title,
+            request.Description,
+            request.DailyRate,
+            request.Address,
+            request.Latitude,
+            request.Longitude);
         var item = new Item
         {
             OwnerId = ownerId,
@@ -112,7 +105,13 @@ public sealed class ItemApplicationService : IItemApplicationService
         UpdateItemRequest request,
         CancellationToken cancellationToken = default)
     {
-        Validate(request.Title, request.Description, request.DailyRate, request.Address, request.Latitude, request.Longitude);
+        CatalogueRequestValidator.ValidateItem(
+            request.Title,
+            request.Description,
+            request.DailyRate,
+            request.Address,
+            request.Latitude,
+            request.Longitude);
         var item = await _items.GetByIdAsync(id, cancellationToken)
             ?? throw new KeyNotFoundException("Item not found.");
 
@@ -143,39 +142,6 @@ public sealed class ItemApplicationService : IItemApplicationService
         return point;
     }
 
-    private static void Validate(
-        string title,
-        string description,
-        decimal rate,
-        string address,
-        double latitude,
-        double longitude)
-    {
-        if (title.Trim().Length is < 3 or > 120)
-        {
-            throw new BusinessRuleException("Title must contain between 3 and 120 characters.");
-        }
-
-        if (description.Trim().Length is < 10 or > 1_500)
-        {
-            throw new BusinessRuleException("Description must contain between 10 and 1,500 characters.");
-        }
-
-        if (rate is <= 0 or > 10_000)
-        {
-            throw new BusinessRuleException("Daily rate must be greater than zero and no more than £10,000.");
-        }
-
-        if (string.IsNullOrWhiteSpace(address) || address.Trim().Length is < 5 or > 250)
-        {
-            throw new BusinessRuleException("Enter a collection address between 5 and 250 characters.");
-        }
-
-        if (latitude is < -90 or > 90 || longitude is < -180 or > 180)
-        {
-            throw new BusinessRuleException("Location coordinates are outside the valid range.");
-        }
-    }
 }
 
 internal static class ItemMappingExtensions
