@@ -39,9 +39,9 @@ public sealed class ClientServiceTests
         Assert.Equal(detail, await service.UpdateAsync(itemId, update));
 
         api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
-            "items/", It.IsAny<CancellationToken>()), Times.Once);
+            "items/?sort=Newest", It.IsAny<CancellationToken>()), Times.Once);
         api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
-            "items/?category=Tools", It.IsAny<CancellationToken>()), Times.Once);
+            "items/?category=Tools&sort=Newest", It.IsAny<CancellationToken>()), Times.Once);
         api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
             "items/nearby?latitude=55.95&longitude=-3.18&radiusKm=5&category=Tools",
             It.IsAny<CancellationToken>()), Times.Once);

@@ -10,15 +10,22 @@ public partial class ItemsListViewModel(IItemService items, INavigationService n
 {
     public ObservableCollection<ItemSummaryDto> Items { get; } = [];
     public IReadOnlyList<string> Categories { get; } = ["All", .. Enum.GetNames<ItemCategory>()];
+    public IReadOnlyList<ItemSortOrder> SortOrders { get; } = Enum.GetValues<ItemSortOrder>();
 
     [ObservableProperty]
     private string selectedCategory = "All";
+
+    [ObservableProperty]
+    private string searchTerm = string.Empty;
+
+    [ObservableProperty]
+    private ItemSortOrder selectedSortOrder = ItemSortOrder.Newest;
 
     [RelayCommand]
     private Task LoadAsync() => RunBusyAsync(async () =>
     {
         ItemCategory? category = Enum.TryParse<ItemCategory>(SelectedCategory, out var parsed) ? parsed : null;
-        var results = await items.GetAllAsync(category);
+        var results = await items.GetAllAsync(category, SearchTerm, SelectedSortOrder);
         Items.Clear();
         foreach (var item in results)
         {

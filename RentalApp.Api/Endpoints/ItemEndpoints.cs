@@ -21,9 +21,11 @@ public static class ItemEndpoints
 
     private static async Task<IResult> GetAllAsync(
         [FromQuery] ItemCategory? category,
+        [FromQuery] string? search,
+        [FromQuery] ItemSortOrder sort,
         IItemApplicationService service,
         CancellationToken cancellationToken) =>
-        Results.Ok(await service.GetAllAsync(category, cancellationToken));
+        Results.Ok(await service.GetAllAsync(category, search, sort, cancellationToken));
 
     private static async Task<IResult> GetNearbyAsync(
         [FromQuery] double latitude,

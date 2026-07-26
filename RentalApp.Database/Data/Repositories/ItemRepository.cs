@@ -14,6 +14,8 @@ public sealed class ItemRepository : Repository<Item>, IItemRepository
 
     public async Task<IReadOnlyList<Item>> GetAvailableAsync(
         ItemCategory? category,
+        string? search,
+        ItemSortOrder sort,
         CancellationToken cancellationToken = default)
     {
         IQueryable<Item> query = Context.Items
@@ -27,7 +29,32 @@ public sealed class ItemRepository : Repository<Item>, IItemRepository
             query = query.Where(item => item.Category == category);
         }
 
-        return await query.OrderByDescending(item => item.CreatedAtUtc).ToListAsync(cancellationToken);
+        var normalizedSearch = search?.Trim().ToLowerInvariant();
+        if (!string.IsNullOrWhiteSpace(normalizedSearch))
+        {
+            query = query.Where(item =>
+                item.Title.ToLower().Contains(normalizedSearch)
+                || item.Description.ToLower().Contains(normalizedSearch)
+                || item.Address.ToLower().Contains(normalizedSearch));
+        }
+
+        query = sort switch
+        {
+            ItemSortOrder.PriceLowToHigh => query
+                .OrderBy(item => item.DailyRate)
+                .ThenByDescending(item => item.CreatedAtUtc),
+            ItemSortOrder.PriceHighToLow => query
+                .OrderByDescending(item => item.DailyRate)
+                .ThenByDescending(item => item.CreatedAtUtc),
+            ItemSortOrder.RatingHighToLow => query
+                .OrderByDescending(item => item.Reviews.Count == 0
+                    ? 0
+                    : item.Reviews.Average(review => review.Rating))
+                .ThenByDescending(item => item.CreatedAtUtc),
+            _ => query.OrderByDescending(item => item.CreatedAtUtc)
+        };
+
+        return await query.ToListAsync(cancellationToken);
     }
 
     public async Task<Item?> GetDetailsAsync(

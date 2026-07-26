@@ -14,7 +14,11 @@ public sealed class ItemsListViewModelTests
             Guid.NewGuid(), Guid.NewGuid(), "Owner", "Drill", 8m, ItemCategory.Tools,
             55.95, -3.18, true, 4.5, 3, null);
         var service = new Mock<IItemService>();
-        service.Setup(candidate => candidate.GetAllAsync(null, It.IsAny<CancellationToken>()))
+        service.Setup(candidate => candidate.GetAllAsync(
+                null,
+                string.Empty,
+                ItemSortOrder.Newest,
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync([expected]);
         var viewModel = new ItemsListViewModel(service.Object, Mock.Of<INavigationService>());
 
@@ -31,7 +35,11 @@ public sealed class ItemsListViewModelTests
     public async Task LoadCommand_ServiceFails_DisplaysErrorWithoutThrowing()
     {
         var service = new Mock<IItemService>();
-        service.Setup(candidate => candidate.GetAllAsync(null, It.IsAny<CancellationToken>()))
+        service.Setup(candidate => candidate.GetAllAsync(
+                null,
+                string.Empty,
+                ItemSortOrder.Newest,
+                It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("API unavailable"));
         var viewModel = new ItemsListViewModel(service.Object, Mock.Of<INavigationService>());
 
@@ -55,5 +63,28 @@ public sealed class ItemsListViewModelTests
         navigation.Verify(candidate => candidate.GoToAsync(
             AppRoutes.ItemDetail,
             It.Is<IReadOnlyDictionary<string, object>>(values => (Guid)values["itemId"] == item.Id)), Times.Once);
+    }
+
+    [Fact]
+    public async Task LoadCommand_SearchAndSortSelected_ForwardsCatalogueQuery()
+    {
+        var service = new Mock<IItemService>();
+        service.Setup(candidate => candidate.GetAllAsync(
+                ItemCategory.Tools,
+                "drill",
+                ItemSortOrder.PriceLowToHigh,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        var viewModel = new ItemsListViewModel(service.Object, Mock.Of<INavigationService>())
+        {
+            SelectedCategory = nameof(ItemCategory.Tools),
+            SearchTerm = "drill",
+            SelectedSortOrder = ItemSortOrder.PriceLowToHigh
+        };
+
+        await viewModel.LoadCommand.ExecuteAsync(null);
+
+        service.VerifyAll();
+        Assert.Empty(viewModel.Items);
     }
 }

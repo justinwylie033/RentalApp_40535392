@@ -11,11 +11,27 @@
         </VerticalStackLayout>
 
         <Border Grid.Row="1" Style="{StaticResource Card}">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
-                        Title="Filter by category" />
-                <Button Grid.Column="1" Text="Refresh" Command="{Binding LoadCommand}"
-                        Style="{StaticResource CompactButton}" VerticalOptions="Center" />
+            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="8" ColumnSpacing="10">
+                <Entry Grid.ColumnSpan="2"
+                       Placeholder="Search title, description or address"
+                       Text="{Binding SearchTerm}"
+                       ReturnType="Search"
+                       ReturnCommand="{Binding LoadCommand}"
+                       SemanticProperties.Hint="Search marketplace listings" />
+                <Picker Grid.Row="1"
+                        ItemsSource="{Binding Categories}"
+                        SelectedItem="{Binding SelectedCategory}"
+                        Title="Category" />
+                <Picker Grid.Row="1"
+                        Grid.Column="1"
+                        ItemsSource="{Binding SortOrders}"
+                        SelectedItem="{Binding SelectedSortOrder}"
+                        Title="Sort order" />
+                <Button Grid.Row="2"
+                        Grid.ColumnSpan="2"
+                        Text="Search marketplace"
+                        Command="{Binding LoadCommand}"
+                        Style="{StaticResource SecondaryButton}" />
             </Grid>
         </Border>
 

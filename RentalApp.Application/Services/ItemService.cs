@@ -5,8 +5,12 @@ namespace RentalApp.Application.Services;
 /// <summary>Defines item catalogue operations used by mobile ViewModels.</summary>
 public interface IItemService
 {
-    /// <summary>Returns available listings, optionally filtered by category.</summary>
-    Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(ItemCategory? category = null, CancellationToken cancellationToken = default);
+    /// <summary>Returns available listings using server-side search, filtering and ordering.</summary>
+    Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(
+        ItemCategory? category = null,
+        string? search = null,
+        ItemSortOrder sort = ItemSortOrder.Newest,
+        CancellationToken cancellationToken = default);
     /// <summary>Returns listings inside a radius of the supplied position.</summary>
     Task<IReadOnlyList<ItemSummaryDto>> FindNearbyAsync(
         double latitude,
@@ -26,9 +30,23 @@ public sealed class ItemService(IApiClient api) : IItemService
 {
     public Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(
         ItemCategory? category = null,
+        string? search = null,
+        ItemSortOrder sort = ItemSortOrder.Newest,
         CancellationToken cancellationToken = default)
     {
-        var path = category is null ? "items/" : $"items/?category={category}";
+        var query = new List<string>();
+        if (category is not null)
+        {
+            query.Add($"category={category}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query.Add($"search={Uri.EscapeDataString(search.Trim())}");
+        }
+
+        query.Add($"sort={sort}");
+        var path = $"items/?{string.Join("&", query)}";
         return api.GetAsync<IReadOnlyList<ItemSummaryDto>>(path, cancellationToken);
     }
 

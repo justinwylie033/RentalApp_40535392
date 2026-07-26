@@ -7,7 +7,11 @@ namespace RentalApp.Api.Services;
 
 public interface IItemApplicationService
 {
-    Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(ItemCategory? category, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(
+        ItemCategory? category,
+        string? search,
+        ItemSortOrder sort,
+        CancellationToken cancellationToken = default);
     Task<ItemDetailDto> GetAsync(Guid id, CancellationToken cancellationToken = default);
     Task<ItemDetailDto> CreateAsync(Guid ownerId, CreateItemRequest request, CancellationToken cancellationToken = default);
     Task<ItemDetailDto> UpdateAsync(Guid ownerId, Guid id, UpdateItemRequest request, CancellationToken cancellationToken = default);
@@ -28,9 +32,16 @@ public sealed class ItemApplicationService : IItemApplicationService
 
     public async Task<IReadOnlyList<ItemSummaryDto>> GetAllAsync(
         ItemCategory? category,
+        string? search,
+        ItemSortOrder sort,
         CancellationToken cancellationToken = default)
     {
-        var availableItems = await _items.GetAvailableAsync(category, cancellationToken);
+        if (search?.Trim().Length > 100)
+        {
+            throw new BusinessRuleException("Search text cannot exceed 100 characters.");
+        }
+
+        var availableItems = await _items.GetAvailableAsync(category, search, sort, cancellationToken);
         var response = availableItems.Select(item => item.ToSummary()).ToList();
         return response;
     }

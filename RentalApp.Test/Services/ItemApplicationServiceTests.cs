@@ -87,6 +87,31 @@ public sealed class ItemApplicationServiceTests
                 "10 Test Street, Edinburgh, EH1 1AA")));
     }
 
+    [Fact]
+    public async Task GetAllAsync_SearchAndPriceSort_ReturnsMatchingItemsInOrder()
+    {
+        await using var context = TestContextFactory.Create();
+        var owner = CreateUser("catalogue@test.local");
+        var expensive = CreateItem(owner);
+        expensive.Title = "Premium drill";
+        expensive.DailyRate = 20m;
+        var affordable = CreateItem(owner);
+        affordable.Title = "Compact drill";
+        affordable.DailyRate = 5m;
+        var unrelated = CreateItem(owner);
+        unrelated.Title = "Camping stove";
+        context.AddRange(owner, expensive, affordable, unrelated);
+        await context.SaveChangesAsync();
+        var service = CreateService(context);
+
+        var results = await service.GetAllAsync(
+            ItemCategory.Tools,
+            "drill",
+            ItemSortOrder.PriceLowToHigh);
+
+        Assert.Equal([affordable.Id, expensive.Id], results.Select(item => item.Id));
+    }
+
     private static ItemApplicationService CreateService(RentalApp.Database.Data.AppDbContext context) =>
         new(new ItemRepository(context), new UnitOfWork(context));
 
