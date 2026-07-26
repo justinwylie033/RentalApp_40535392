@@ -33,6 +33,7 @@ public sealed class ClientServiceTests
 
         Assert.Single((await service.GetAllAsync()).Items);
         Assert.Single((await service.GetAllAsync(ItemCategory.Tools)).Items);
+        Assert.Single(await service.GetMineAsync());
         Assert.Single(await service.FindNearbyAsync(55.95, -3.18, 5, ItemCategory.Tools));
         Assert.Equal(detail, await service.GetAsync(itemId));
         Assert.Equal(detail, await service.CreateAsync(create));
@@ -42,6 +43,8 @@ public sealed class ClientServiceTests
             "items/?sort=Newest&page=1&pageSize=20", It.IsAny<CancellationToken>()), Times.Once);
         api.Verify(client => client.GetAsync<PagedResult<ItemSummaryDto>>(
             "items/?category=Tools&sort=Newest&page=1&pageSize=20", It.IsAny<CancellationToken>()), Times.Once);
+        api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
+            "items/mine", It.IsAny<CancellationToken>()), Times.Once);
         api.Verify(client => client.GetAsync<IReadOnlyList<ItemSummaryDto>>(
             "items/nearby?latitude=55.95&longitude=-3.18&radiusKm=5&category=Tools",
             It.IsAny<CancellationToken>()), Times.Once);

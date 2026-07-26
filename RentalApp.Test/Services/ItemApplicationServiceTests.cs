@@ -115,6 +115,27 @@ public sealed class ItemApplicationServiceTests
         Assert.Equal(2, results.TotalCount);
     }
 
+    [Fact]
+    public async Task GetOwnedAsync_IncludesUnavailableItemsForCurrentOwnerOnly()
+    {
+        await using var context = TestContextFactory.Create();
+        var owner = CreateUser("owner-list@test.local");
+        var other = CreateUser("other-list@test.local");
+        var available = CreateItem(owner);
+        var unavailable = CreateItem(owner);
+        unavailable.IsAvailable = false;
+        var otherItem = CreateItem(other);
+        context.AddRange(owner, other, available, unavailable, otherItem);
+        await context.SaveChangesAsync();
+        var service = CreateService(context);
+
+        var results = await service.GetOwnedAsync(owner.Id);
+
+        Assert.Equal(2, results.Count);
+        Assert.Contains(results, item => !item.IsAvailable);
+        Assert.DoesNotContain(results, item => item.OwnerId == other.Id);
+    }
+
     private static ItemApplicationService CreateService(RentalApp.Database.Data.AppDbContext context) =>
         new(new ItemRepository(context), new UnitOfWork(context));
 

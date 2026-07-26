@@ -13,6 +13,8 @@ public interface IItemService
         int page = 1,
         int pageSize = 20,
         CancellationToken cancellationToken = default);
+    /// <summary>Returns all listings created by the signed-in account.</summary>
+    Task<IReadOnlyList<ItemSummaryDto>> GetMineAsync(CancellationToken cancellationToken = default);
     /// <summary>Returns listings inside a radius of the supplied position.</summary>
     Task<IReadOnlyList<ItemSummaryDto>> FindNearbyAsync(
         double latitude,
@@ -72,6 +74,10 @@ public sealed class ItemService(IApiClient api) : IItemService
 
         return api.GetAsync<IReadOnlyList<ItemSummaryDto>>(path, cancellationToken);
     }
+
+    public Task<IReadOnlyList<ItemSummaryDto>> GetMineAsync(
+        CancellationToken cancellationToken = default) =>
+        api.GetAsync<IReadOnlyList<ItemSummaryDto>>("items/mine", cancellationToken);
 
     public Task<ItemDetailDto> GetAsync(Guid id, CancellationToken cancellationToken = default) =>
         api.GetAsync<ItemDetailDto>($"items/{id}", cancellationToken);

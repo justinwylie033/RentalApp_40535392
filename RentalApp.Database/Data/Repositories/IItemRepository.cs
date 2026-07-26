@@ -14,6 +14,8 @@ public interface IItemRepository : IRepository<Item>
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
+    /// <summary>Returns every listing belonging to one account, including unavailable listings.</summary>
+    Task<IReadOnlyList<Item>> GetOwnedAsync(Guid ownerId, CancellationToken cancellationToken = default);
     /// <summary>Returns one item with the relationships needed by the API.</summary>
     Task<Item?> GetDetailsAsync(Guid id, CancellationToken cancellationToken = default);
     /// <summary>Runs the indexed PostGIS radius query and returns distances in metres.</summary>

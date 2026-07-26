@@ -14,6 +14,7 @@ public interface IItemApplicationService
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ItemSummaryDto>> GetOwnedAsync(Guid ownerId, CancellationToken cancellationToken = default);
     Task<ItemDetailDto> GetAsync(Guid id, CancellationToken cancellationToken = default);
     Task<ItemDetailDto> CreateAsync(Guid ownerId, CreateItemRequest request, CancellationToken cancellationToken = default);
     Task<ItemDetailDto> UpdateAsync(Guid ownerId, Guid id, UpdateItemRequest request, CancellationToken cancellationToken = default);
@@ -71,6 +72,14 @@ public sealed class ItemApplicationService : IItemApplicationService
         var item = await _items.GetDetailsAsync(id, cancellationToken)
             ?? throw new KeyNotFoundException("Item not found.");
         return item.ToDetail();
+    }
+
+    public async Task<IReadOnlyList<ItemSummaryDto>> GetOwnedAsync(
+        Guid ownerId,
+        CancellationToken cancellationToken = default)
+    {
+        var ownedItems = await _items.GetOwnedAsync(ownerId, cancellationToken);
+        return ownedItems.Select(item => item.ToSummary()).ToList();
     }
 
     public async Task<ItemDetailDto> CreateAsync(

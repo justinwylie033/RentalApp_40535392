@@ -11,6 +11,7 @@ public partial class AppShell : Shell
         IAuthenticationService authentication,
         LoginPage loginPage,
         ItemsListPage itemsPage,
+        MyListingsPage myListingsPage,
         NearbyItemsPage nearbyPage,
         CreateItemPage createPage,
         RentalsPage rentalsPage,
@@ -20,6 +21,7 @@ public partial class AppShell : Shell
         _authentication = authentication;
         Items.Add(new ShellContent { Title = "Sign in", Route = "login", Content = loginPage });
         Items.Add(CreateFlyoutItem("Browse", "items", "Items", itemsPage));
+        Items.Add(CreateFlyoutItem("My listings", "my-listings", "My listings", myListingsPage));
         Items.Add(CreateFlyoutItem("Nearby", "nearby", "Near me", nearbyPage));
         Items.Add(CreateFlyoutItem("List an item", "create", "Create", createPage));
         Items.Add(CreateFlyoutItem("Rentals", "rentals", "Rentals", rentalsPage));

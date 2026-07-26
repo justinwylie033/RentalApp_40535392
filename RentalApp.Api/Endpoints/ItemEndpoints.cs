@@ -13,6 +13,7 @@ public static class ItemEndpoints
         var group = endpoints.MapGroup("/items").WithTags("Items").RequireAuthorization();
         group.MapGet("/", GetAllAsync);
         group.MapGet("/nearby", GetNearbyAsync);
+        group.MapGet("/mine", GetOwnedAsync);
         group.MapGet("/{id:guid}", GetAsync);
         group.MapPost("/", CreateAsync);
         group.MapPut("/{id:guid}", UpdateAsync);
@@ -34,6 +35,12 @@ public static class ItemEndpoints
             page ?? 1,
             pageSize ?? 20,
             cancellationToken));
+
+    private static async Task<IResult> GetOwnedAsync(
+        HttpContext context,
+        IItemApplicationService service,
+        CancellationToken cancellationToken) =>
+        Results.Ok(await service.GetOwnedAsync(context.User.GetUserId(), cancellationToken));
 
     private static async Task<IResult> GetNearbyAsync(
         [FromQuery] double latitude,

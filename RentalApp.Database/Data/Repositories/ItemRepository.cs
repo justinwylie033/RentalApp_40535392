@@ -79,6 +79,19 @@ public sealed class ItemRepository : Repository<Item>, IItemRepository
         return item;
     }
 
+    public async Task<IReadOnlyList<Item>> GetOwnedAsync(
+        Guid ownerId,
+        CancellationToken cancellationToken = default)
+    {
+        return await Context.Items
+            .AsNoTracking()
+            .Include(item => item.Owner)
+            .Include(item => item.Reviews)
+            .Where(item => item.OwnerId == ownerId)
+            .OrderByDescending(item => item.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<(Item Item, double DistanceMetres)>> GetNearbyAsync(
         double latitude,
         double longitude,
