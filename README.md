@@ -179,7 +179,7 @@ contracts are outside the metric; endpoint startup and other handwritten API
 code remain included and are exercised through `WebApplicationFactory` HTTP
 integration tests.
 
-Latest verified GitHub Actions result (26 July 2026): **89 passed, 0 failed,
+Latest verified GitHub Actions result (28 July 2026): **89 passed, 0 failed,
 0 skipped**, with **87.4% line coverage**. The tests ran on Linux .NET 10
 against the workflow's PostgreSQL 16/PostGIS service.
 

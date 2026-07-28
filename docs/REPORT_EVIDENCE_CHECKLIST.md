@@ -10,7 +10,7 @@ captures across three evidence pages, test-class breakdown, three test excerpts,
 verified CI/coverage exports, workflow excerpt, pattern evidence, AI record, and
 references.
 
-- [x] Minimal designed cover: project title and matriculation number are prominent; Justin Wylie, the 27 July 2026 submission date, and public GitHub URL are integrated into the main title-page design to preserve all cover-page marks.
+- [x] Minimal designed cover: project title and matriculation number are prominent; Justin Wylie, the 28 July 2026 submission date, and public GitHub URL are integrated into the main title-page design to preserve all cover-page marks.
 - [x] Component diagram from `ARCHITECTURE.md`.
 - [x] Database schema diagram from `ARCHITECTURE.md`.
 - [x] Rental sequence diagram from `ARCHITECTURE.md`.
@@ -22,7 +22,7 @@ references.
 - [x] Insert a rendered coverage evidence panel sourced from the successful Actions artifact.
 - [x] Test class and test-count list: 89 total, 89 passed, 0 failed, 0 skipped.
 - [x] Three representative test excerpts.
-- [x] `.github/workflows/build.yml` excerpt and API-verified evidence that both jobs passed in run #3.
+- [x] `.github/workflows/build.yml` excerpt and API-verified evidence that both jobs passed in final run #5.
 - [x] MVVM, Repository, Service Layer, and State Pattern explanations with one code excerpt each.
 - [x] At least three significant AI interactions and a critical reflection from `AI_USAGE.md`.
 - [x] References to the official .NET MAUI, EF Core, Npgsql/NetTopologySuite, PostGIS, xUnit, Docker, and GitHub Actions documentation.
