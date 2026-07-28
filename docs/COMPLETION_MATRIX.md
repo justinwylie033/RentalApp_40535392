@@ -11,7 +11,7 @@ This matrix maps the implemented project to the coursework brief. It is an engin
 | PostgreSQL 16 + PostGIS | `postgis/postgis:16-3.5-alpine`, geography point, GiST index, radius query | Complete |
 | Entity Framework Core | `AppDbContext`, repositories, migration project, startup migration/bootstrap | Complete |
 | xUnit | Unit, ViewModel, service, state-machine, API-client, and PostGIS integration tests | Complete |
-| GitHub Actions | Pull-request/push workflow, PostgreSQL service, coverage report, signed APK artifact | Complete; run #3 is green |
+| GitHub Actions | Pull-request/push workflow, PostgreSQL service, coverage report, signed APK artifact | Complete; final run #5 is green |
 | Docker Compose | Local development and secret-driven production-style Compose definitions | Complete |
 | VS Code Dev Container | .NET 10 container, C# Dev Kit recommendations, Windows-host Docker guidance | Complete |
 
@@ -51,10 +51,10 @@ Then complete all external evidence gates:
 - [x] Install the final APK and complete the workflow in `README.md` without a crash.
 - [x] Push the source to the public `justinwylie033/RentalApp_40535392` repository.
 - [x] Confirm both GitHub Actions jobs are green and download their artifacts.
-- [x] Record the latest verified result: 89/89 passing with 87.4% line coverage (26 July 2026).
+- [x] Record the latest verified result: 89/89 passing with 87.4% line coverage (28 July 2026).
 - [x] Capture login, browse, details/edit, create, nearby, rentals, reviews, and profile screenshots.
 - [x] Include all report sections from `REPORT_EVIDENCE_CHECKLIST.md` in a 19-page PDF.
-- [x] Retain at least 18 reachable commits, including 13 focused upgrade/fix commits reviewed through pull request #1.
+- [x] Retain 20 reachable commits, including 13 focused upgrade/fix commits reviewed through pull request #1 and the final evidence commit reviewed through pull request #2.
 - [ ] Practise the eight-minute demonstration and be able to explain the four patterns and AI decisions.
 
 ## Known scope boundaries

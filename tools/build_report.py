@@ -19,16 +19,20 @@ OUT = ROOT / "output" / "report"
 ASSETS = OUT / "assets"
 DOCX_PATH = OUT / "RentalApp_40535392_Report_Final.docx"
 REPOSITORY_URL = "https://github.com/justinwylie033/RentalApp_40535392"
-PULL_REQUEST_URL = f"{REPOSITORY_URL}/pull/1"
-CI_RUN_URL = f"{REPOSITORY_URL}/actions/runs/30217148542"
-CI_COMMIT = "8a913ee"
+PULL_REQUEST_URL = f"{REPOSITORY_URL}/pull/2"
+CI_RUN_URL = f"{REPOSITORY_URL}/actions/runs/30390459728"
+CI_RUN_NUMBER = 5
+CI_RUN_ID = 30390459728
+CI_COMMIT = "e047977"
 FINAL_TESTS = 89
 FINAL_LINE_COVERAGE = 87.4
 FINAL_BRANCH_COVERAGE = 65.7
 FINAL_METHOD_COVERAGE = 87.6
-FINAL_COMMITS = 18
-SUBMISSION_DATE = "27 July 2026"
-CI_RUN_DATE = "26 July 2026"
+FINAL_COMMITS = 20
+SUBMISSION_DATE = "28 July 2026"
+CI_RUN_DATE = "28 July 2026"
+TEST_ARTIFACT_SIZE = "515,393 bytes"
+ANDROID_ARTIFACT_SIZE = "27,799,217 bytes"
 
 # Selected design system: standard_business_brief.
 # Named coursework overrides: Calibri 12 pt body and single line spacing to meet
@@ -253,7 +257,7 @@ def save_coverage_evidence(path: Path):
     d.text((70, 48), "Verified test and coverage export", font=font_bold(44), fill=f"#{NAVY}")
     d.text(
         (70, 108),
-        f"GitHub Actions run #3 | {CI_RUN_DATE} | commit 8a913ee",
+        f"GitHub Actions run #{CI_RUN_NUMBER} | {CI_RUN_DATE} | commit {CI_COMMIT}",
         font=font(23),
         fill=f"#{MUTED}",
     )
@@ -301,7 +305,7 @@ def save_ci_evidence(path: Path):
     d.text((70, 48), "GitHub Actions - verified successful run", font=font_bold(44), fill=f"#{NAVY}")
     d.text(
         (70, 108),
-        "Build, test and package | run #3 | pull request #1 | commit 8a913ee",
+        f"Build, test and package | run #{CI_RUN_NUMBER} | pull request #2 | commit {CI_COMMIT}",
         font=font(23),
         fill=f"#{MUTED}",
     )
@@ -343,11 +347,11 @@ def save_ci_evidence(path: Path):
     d.text((100, 714), "Artifacts", font=font_bold(24), fill=f"#{NAVY}")
     d.text(
         (100, 758),
-        "test-results-and-coverage (515,650 bytes)   |   rentalapp-android (27,798,845 bytes)",
+        f"test-results-and-coverage ({TEST_ARTIFACT_SIZE})   |   rentalapp-android ({ANDROID_ARTIFACT_SIZE})",
         font=font(22),
         fill=f"#{INK}",
     )
-    d.text((70, 852), "Source: GitHub Actions run 30217148542.", font=font(18), fill=f"#{MUTED}")
+    d.text((70, 852), f"Source: GitHub Actions run {CI_RUN_ID}.", font=font(18), fill=f"#{MUTED}")
     im.save(path, quality=95)
 
 
@@ -1134,14 +1138,14 @@ jobs:
       - run: sdkmanager platforms;android-36
       - run: dotnet publish ... -f net10.0-android
       - uses: actions/upload-artifact@v7''', ".github/workflows/build.yml (abridged)")
-    add_figure(doc, diagrams["ci"], "Figure 15. API-verified summary of GitHub Actions run #3; both required jobs succeeded.", 5.8)
+    add_figure(doc, diagrams["ci"], f"Figure 15. API-verified summary of GitHub Actions run #{CI_RUN_NUMBER}; both required jobs succeeded.", 5.8)
     p = doc.add_paragraph()
     p.paragraph_format.space_after = Pt(4)
     r = p.add_run("Evidence links: ")
     set_run(r, 10.5, INK, True)
     add_hyperlink(p, CI_RUN_URL, "successful workflow run")
     p.add_run(" | ")
-    add_hyperlink(p, PULL_REQUEST_URL, "merged pull request #1")
+    add_hyperlink(p, PULL_REQUEST_URL, "merged final pull request #2")
 
     # Pages 16-17: design patterns. The preceding CI page is full, so the
     # keep-with-next heading starts this section on the following page.
@@ -1266,7 +1270,7 @@ public sealed class OutForRentState : RentalState
         ("Public repository", f"{REPOSITORY_URL} is public; master contains at least {FINAL_COMMITS} reachable commits."),
         ("Required features", "Feature matrix, source paths, architecture diagrams, and executable tests are included."),
         ("Tests / coverage", f"{FINAL_TESTS}/{FINAL_TESTS} passed; {FINAL_LINE_COVERAGE:.1f}% line coverage; 80% CI gate passed."),
-        ("CI/CD", "Run #3 succeeded for backend-tests and android-build; both evidence artifacts exist."),
+        ("CI/CD", f"Run #{CI_RUN_NUMBER} succeeded for backend-tests and android-build; both evidence artifacts exist."),
         ("README / setup", "Windows startup, Docker, Android, testing, deployment, and demo workflow are documented."),
         ("Credentials", "No production secret is committed; local demo values are labelled and production Compose requires environment inputs."),
         ("Code explanation", "Architecture guide, demonstration guide, XML summaries, and presentation-point comments are included."),

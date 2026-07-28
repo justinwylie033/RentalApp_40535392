@@ -89,7 +89,7 @@ AI accelerated repetitive code and highlighted architectural options, but its ou
 
 **Evaluation and control:** The account model was simplified, but ownership and borrower checks were deliberately retained in the API. The UI now presents only valid actions for the current relationship and state; it does not grant permissions by hiding buttons alone.
 
-**Validation:** Focused rental ViewModel tests and API workflow tests confirm the correct actions and server-side role checks. The final GitHub Actions run on 26 July 2026 completed **89 tests with 89 passed, 0 failed, and 0 skipped**. Cobertura measured **87.4% line coverage**, above the brief's 80% distinction testing threshold.
+**Validation:** Focused rental ViewModel tests and API workflow tests confirm the correct actions and server-side role checks. The final GitHub Actions run on 28 July 2026 completed **89 tests with 89 passed, 0 failed, and 0 skipped**. Cobertura measured **87.4% line coverage**, above the brief's 80% distinction testing threshold.
 
 ## Significant interaction 9: review completion and rating counts
 
@@ -115,6 +115,6 @@ whose messages describe independently reviewable behaviour. They were reviewed
 through pull request #1. A final API-route correction and matching regression
 test restored green CI before the pull request was merged.
 
-**Validation:** GitHub Actions run #3 completed both `backend-tests` and
+**Validation:** Final GitHub Actions run #5 completed both `backend-tests` and
 `android-build` successfully, enforced the 80% coverage gate, and uploaded the
-coverage/test artifact and signed Android APK.
+coverage/test artifact and signed Android APK before pull request #2 was merged.

@@ -33,13 +33,13 @@ create meaningless commits to manufacture the rubric evidence.
 
 ## 2. Verified public repository
 
-Verified on 27 July 2026:
+Verified on 28 July 2026:
 
 - Public repository:
   `https://github.com/justinwylie033/RentalApp_40535392`
 - Default branch: `master`
-- Reachable commits on `master`: at least 18
-- Pull request #1: merged
+- Reachable commits on `master`: 20
+- Pull requests #1 and #2: merged
 
 Before the final push, confirm the local remote and branch:
 
@@ -72,7 +72,7 @@ If a job fails, open that job and copy the first failing step and its complete
 error message. Fix the cause in source, commit the real fix, push it, and wait
 for the replacement run.
 
-Verified run `30217148542` completed both jobs successfully. Its test artifact
+Verified final run `30390459728` completed both jobs successfully. Its test artifact
 contains 89 passing tests and 87.4% line coverage.
 
 ## 4. Final report evidence
