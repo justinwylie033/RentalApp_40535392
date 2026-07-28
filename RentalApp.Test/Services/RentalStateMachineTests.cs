@@ -5,7 +5,7 @@ namespace RentalApp.Test.Services;
 
 public sealed class RentalStateMachineTests
 {
-    // Presentation point: the same seven concrete states registered by DI are used
+    // Presentation point: the same eight concrete states registered by DI are used
     // here, making this a focused unit test of the State Pattern itself.
     private readonly RentalStateMachine _machine = new(
     [

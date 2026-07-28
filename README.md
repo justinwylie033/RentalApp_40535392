@@ -36,12 +36,15 @@ ordinary constructors, named private fields, explicit method bodies, and named
 intermediate values so the execution path can be followed without relying on
 dense C# shorthand.
 
-The quantitative report sections are assembled in
-`output/report/RentalApp_40535392_Report_Draft.docx`, with a rendered PDF in
-`output/pdf/RentalApp_40535392_Report_Draft.pdf`. The draft is intentionally not
-submission-final: replace its marked evidence slots with the coverage-report
-screenshot, actual emulator screenshots, green GitHub Actions run, public
-repository URL, and submission date.
+The final report is available at
+`output/report/RentalApp_40535392_Report_Final.docx`, with the submission PDF at
+`output/pdf/RentalApp_40535392_Report_Final.pdf`. It includes the public
+repository URL, architecture diagrams, feature-to-source evidence, the retained
+Near me emulator capture, final CI coverage export, successful workflow
+evidence, design-pattern examples, AI disclosure, and submission verification.
+Three compact evidence pages include eight genuine emulator screenshots covering
+authentication, browsing, item detail, listing creation, nearby search, rental
+workflow, navigation, profile, reputation, and sign-out.
 
 ## Prerequisites
 
@@ -176,9 +179,9 @@ contracts are outside the metric; endpoint startup and other handwritten API
 code remain included and are exercised through `WebApplicationFactory` HTTP
 integration tests.
 
-Latest verified result (26 July 2026): **65 passed, 0 failed,
-0 skipped**, with **86.4% line coverage** in 16 seconds. The tests ran in the Linux .NET 10 Dev Container image
-against the Compose PostGIS service, matching the CI execution model.
+Latest verified GitHub Actions result (26 July 2026): **89 passed, 0 failed,
+0 skipped**, with **87.4% line coverage**. The tests ran on Linux .NET 10
+against the workflow's PostgreSQL 16/PostGIS service.
 
 GitHub Actions runs the same PostGIS-backed tests, fails the job if measured
 line coverage drops below 80%, and converts the Cobertura output into HTML and

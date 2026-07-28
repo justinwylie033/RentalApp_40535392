@@ -11,7 +11,7 @@ This matrix maps the implemented project to the coursework brief. It is an engin
 | PostgreSQL 16 + PostGIS | `postgis/postgis:16-3.5-alpine`, geography point, GiST index, radius query | Complete |
 | Entity Framework Core | `AppDbContext`, repositories, migration project, startup migration/bootstrap | Complete |
 | xUnit | Unit, ViewModel, service, state-machine, API-client, and PostGIS integration tests | Complete |
-| GitHub Actions | Pull-request/push workflow, PostgreSQL service, coverage report, signed APK artifact | Complete in source; capture a green run |
+| GitHub Actions | Pull-request/push workflow, PostgreSQL service, coverage report, signed APK artifact | Complete; run #3 is green |
 | Docker Compose | Local development and secret-driven production-style Compose definitions | Complete |
 | VS Code Dev Container | .NET 10 container, C# Dev Kit recommendations, Windows-host Docker guidance | Complete |
 
@@ -27,7 +27,7 @@ This matrix maps the implemented project to the coursework brief. It is an engin
 | MVVM | Observable ViewModels and generated commands; minimal page lifecycle code | Complete |
 | Repository pattern | Generic repository plus item, rental, and review repositories | Complete |
 | Location discovery | Address geocoding, device GPS alternative, radius/category, PostGIS distance | Complete |
-| Rental workflow | Approve, reject, start, return, complete, role-aware UI actions | Complete |
+| Rental workflow | Approve, reject, cancel, start, return, complete, relationship-aware UI actions | Complete |
 | Double-booking prevention | Inclusive date-overlap validation in the API service | Complete |
 | Reviews | Borrower-only verified review after completion; completed-rental picker | Complete |
 | Service layer | Separate API and client services for items, location, rentals, reviews, auth | Complete |
@@ -48,13 +48,13 @@ dotnet publish RentalApp/RentalApp.csproj -c Debug -f net10.0-android -p:Android
 
 Then complete all external evidence gates:
 
-- [ ] Install the final APK and complete the workflow in `README.md` without a crash.
-- [ ] Push the source to a public GitHub repository.
-- [ ] Confirm both GitHub Actions jobs are green and download their artifacts.
-- [x] Record the latest verified result: 65/65 passing with 86.4% line coverage (26 July 2026).
-- [ ] Capture login, browse, details/edit, create, nearby, rentals, reviews, and profile screenshots.
-- [ ] Include all report sections from `REPORT_EVIDENCE_CHECKLIST.md` in a PDF under 20 pages.
-- [ ] Retain genuine meaningful Git history. Do not manufacture the requested 15 commits after the work.
+- [x] Install the final APK and complete the workflow in `README.md` without a crash.
+- [x] Push the source to the public `justinwylie033/RentalApp_40535392` repository.
+- [x] Confirm both GitHub Actions jobs are green and download their artifacts.
+- [x] Record the latest verified result: 89/89 passing with 87.4% line coverage (26 July 2026).
+- [x] Capture login, browse, details/edit, create, nearby, rentals, reviews, and profile screenshots.
+- [x] Include all report sections from `REPORT_EVIDENCE_CHECKLIST.md` in a 19-page PDF.
+- [x] Retain at least 18 reachable commits, including 13 focused upgrade/fix commits reviewed through pull request #1.
 - [ ] Practise the eight-minute demonstration and be able to explain the four patterns and AI decisions.
 
 ## Known scope boundaries
