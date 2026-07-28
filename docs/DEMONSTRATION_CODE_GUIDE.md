@@ -30,7 +30,7 @@ longer than compressed expression syntax, but easier to trace and defend.
 | 5:25 | `RentalApp.Database/States/RentalStates.cs` | Advanced State Pattern and Open/Closed Principle. |
 | 6:05 | `RentalApp.Application/Services/ApiClient.cs` | Secure token injection, refresh-token rotation, concurrency lock, API errors. |
 | 6:50 | `RentalApp.Test/Api/RentalApiTests.cs` | Full HTTP/JWT/PostGIS integration testing. |
-| 7:25 | `RentalApp.Test/Repositories/ItemRepositoryTests.cs` | Real spatial integration test and evidence for the 86.4% coverage result. |
+| 7:25 | `RentalApp.Test/Repositories/ItemRepositoryTests.cs` | Real spatial integration test included in the verified 87.4% coverage result. |
 
 ## Four pattern answers
 

@@ -1,7 +1,8 @@
 # GitHub submission hand-off
 
-Use this checklist on the exact folder that will be submitted. It keeps the
-remaining GitHub work honest and produces the evidence required by the brief.
+Use this checklist on the exact folder that will be submitted. The public
+repository and CI evidence are now verified; the remaining task is to publish
+the final documentation changes without losing the genuine history.
 
 ## 1. Preserve any genuine history
 
@@ -30,34 +31,24 @@ That creates one truthful snapshot commit. It does not prove fifteen commits
 over the project period. Do not split unchanged files, backdate commits, or
 create meaningless commits to manufacture the rubric evidence.
 
-## 2. Create and connect the public repository
+## 2. Verified public repository
 
-Create an empty public GitHub repository named `RentalApp_40535392`. Do not add
-a generated `.gitignore` or licence when the local repository already has an
-initial commit.
+Verified on 27 July 2026:
 
-Copy the repository URL, then run:
+- Public repository:
+  `https://github.com/justinwylie033/RentalApp_40535392`
+- Default branch: `master`
+- Reachable commits on `master`: at least 18
+- Pull request #1: merged
 
-```powershell
-git remote add origin https://github.com/YOUR-USER/RentalApp_40535392.git
-git branch -M main
-git push -u origin main
-```
-
-If `origin` already exists, inspect it before changing anything:
+Before the final push, confirm the local remote and branch:
 
 ```powershell
 git remote get-url origin
+git branch --show-current
+git fetch origin master
+git status --short
 ```
-
-Only replace it when it points to the wrong repository:
-
-```powershell
-git remote set-url origin https://github.com/YOUR-USER/RentalApp_40535392.git
-```
-
-Open the repository URL in a private or signed-out browser window. The source,
-README, and commit history must be visible without signing in.
 
 ## 3. Verify GitHub Actions
 
@@ -66,7 +57,7 @@ started manually from **Actions → Build, test and package → Run workflow**.
 
 The run is only complete when both jobs are green:
 
-- `backend-tests`: restores and builds the backend, runs the 65 xUnit tests
+- `backend-tests`: restores and builds the backend, runs the 89 xUnit tests
   against a PostGIS service, enforces at least 80% line coverage, generates a
   readable coverage report, and uploads the evidence.
 - `android-build`: installs .NET 10, MAUI Android, Android API 36, and Java 17;
@@ -81,43 +72,36 @@ If a job fails, open that job and copy the first failing step and its complete
 error message. Fix the cause in source, commit the real fix, push it, and wait
 for the replacement run.
 
-## 4. Capture final report evidence
+Verified run `30217148542` completed both jobs successfully. Its test artifact
+contains 89 passing tests and 87.4% line coverage.
 
-Capture screenshots that clearly show:
+## 4. Final report evidence
 
-1. The public repository home page and its URL.
-2. The repository commit history and genuine commit count.
-3. The successful workflow run with both jobs green.
-4. The coverage summary showing at least 80%.
-5. The Android artifact listed on the workflow run.
+The final report now includes:
 
-Also capture the seven outstanding emulator screens listed in
-`REPORT_EVIDENCE_CHECKLIST.md`.
+- the public GitHub URL and 18-commit verification;
+- API-verified evidence that both Actions jobs are green;
+- the 89-test and 87.4%-coverage export;
+- four architecture diagrams;
+- eight genuine Android emulator screenshots;
+- every report section listed in Section 10 of the brief.
 
-Add the public URL and screenshots to the report, export the final PDF, and
-confirm it remains below twenty pages.
+The rendered PDF is 19 pages and has passed a complete page-by-page visual
+inspection.
 
-## 5. Suggested commits for remaining real work
+## 5. Publish the final documentation
 
-These are appropriate only when the described change actually exists:
-
-```text
-ci: harden automated tests and Android packaging
-docs: add GitHub submission verification guide
-docs: add final workflow and emulator evidence
-docs: finalise submission report
-```
-
-Stage each logical change separately and inspect it before committing:
+Inspect and commit only the real final-report changes:
 
 ```powershell
 git status --short
 git diff
-git add .github/workflows/build.yml
+git add README.md docs tools/build_report.py output/report output/pdf
 git diff --cached
-git commit -m "ci: harden automated tests and Android packaging"
+git commit -m "docs: finalise verified coursework report"
+git push origin master
 ```
 
-Repeat with the files that belong to each later change. Never use `git add .`
-without first checking that generated archives, APKs, keystores, `.env`, and
-test-result folders are ignored.
+Do not add generated archives, APKs, keystores, `.env`, or local test-result
+folders. After pushing, confirm the new `master` workflow run is green before
+submission.

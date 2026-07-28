@@ -59,7 +59,7 @@ AI accelerated repetitive code and highlighted architectural options, but its ou
 
 **Evaluation and control:** The new tests exercise API endpoints through `WebApplicationFactory`, use the real PostgreSQL/PostGIS service for integration paths, and retain handwritten API, application, and database code in scope. When Windows Application Control blocked a newly built test assembly, the same tests were run in the documented .NET 10 Linux Dev Container image instead of weakening the machine's security policy.
 
-**Validation:** The address-enabled Docker/Linux run completed 60 tests with 60 passed, 0 failed, and 0 skipped in 23 seconds. Its Cobertura report measured 86.5% line coverage, exceeding the brief's 80% distinction threshold. Later workflow, sign-out, network-retry, unified-account, and review-count changes were covered by the final 65-test run described below.
+**Validation:** The address-enabled Docker/Linux run completed 60 tests with 60 passed, 0 failed, and 0 skipped in 23 seconds. Its Cobertura report measured 86.5% line coverage, exceeding the brief's 80% distinction threshold. Later workflow, sign-out, network-retry, unified-account, review-count, and submission-upgrade changes were covered by the final 89-test GitHub Actions run described below.
 
 ## Significant interaction 6: user-friendly collection addresses
 
@@ -89,7 +89,7 @@ AI accelerated repetitive code and highlighted architectural options, but its ou
 
 **Evaluation and control:** The account model was simplified, but ownership and borrower checks were deliberately retained in the API. The UI now presents only valid actions for the current relationship and state; it does not grant permissions by hiding buttons alone.
 
-**Validation:** Focused rental ViewModel tests and API workflow tests confirm the correct actions and server-side role checks. The final Docker/Linux run on 26 July 2026 completed **65 tests with 65 passed, 0 failed, and 0 skipped in 16 seconds**. Cobertura measured **86.4% line coverage**, above the brief's 80% distinction testing threshold.
+**Validation:** Focused rental ViewModel tests and API workflow tests confirm the correct actions and server-side role checks. The final GitHub Actions run on 26 July 2026 completed **89 tests with 89 passed, 0 failed, and 0 skipped**. Cobertura measured **87.4% line coverage**, above the brief's 80% distinction testing threshold.
 
 ## Significant interaction 9: review completion and rating counts
 
@@ -99,4 +99,22 @@ AI accelerated repetitive code and highlighted architectural options, but its ou
 
 **Evaluation and control:** The database still enforces one review per rental, and the API still limits review creation to the requester after the rental is completed. The count is calculated from loaded review data and transported through DTOs rather than queried directly by the View.
 
-**Validation:** Review service, item-detail, profile, rental, and review ViewModel tests cover eligibility, navigation, and display data. These tests are included in the final 65-test, 86.4%-coverage result.
+**Validation:** Review service, item-detail, profile, rental, and review ViewModel tests cover eligibility, navigation, and display data. These tests are included in the final 89-test, 87.4%-coverage result.
+
+## Significant interaction 10: submission-focused marketplace upgrades
+
+**Task:** Improve the final submission with meaningful upgrades and a verifiable
+GitHub history rather than padding the history with empty changes.
+
+**Suggestion received:** Add user-visible search, sorting, paging, My Listings,
+availability, cancellation, accessibility semantics, and engineering controls
+for readiness, rate limiting, security headers, and correlation tracing.
+
+**Evaluation and control:** The changes were separated into 13 focused commits
+whose messages describe independently reviewable behaviour. They were reviewed
+through pull request #1. A final API-route correction and matching regression
+test restored green CI before the pull request was merged.
+
+**Validation:** GitHub Actions run #3 completed both `backend-tests` and
+`android-build` successfully, enforced the 80% coverage gate, and uploaded the
+coverage/test artifact and signed Android APK.
